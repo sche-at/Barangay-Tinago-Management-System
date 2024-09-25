@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+
+body {
+    background-color: #588157;
+}
+.heading{
+    float: right;
+    margin-left: 10px;
+    margin-right: 90px;
+    margin-top: -900px;
+    text-align: center;
+    font-size: xx-large;
+    color: white;
+ 
+}
+.format{
+    float: right;
+    margin-right: 350px;
+    margin-top: -600px;
+    text-align: center;
+    font-size: x-large;
+
+    color: rgb(0, 0, 0);
+}
+.styled-form{
+    border: 2px solid #ccc;
+    padding: 130px;
+    border-radius: 10px;
+    float: right; 
+    margin-left: 10px;
+    margin-right: 100px;
+    margin-top: -700px;
+}
+#username, #password{
+    border-radius: 20px;
+    padding: 10px;
+  
+}
+#sign {
+    border-radius: 15px;
+    font-size: small;
+    background-color: #0A5C36;
+   
+}
+
+.u {
+    text-decoration: underline;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+
+
+.styled-form {
+    border: 2px solid #ccc;
+    padding: 200px;
+    border-radius: 10px;
+    background-image: url( 'https://i.ibb.co/C6BXhbT/cheer.jpg" alt="cheer" border="0"');
+   background-size: cover;
+   background-position: center;
+   background-color: rgba(255, 255, 255, 1); 
+   
+}
+article{
+    text-align: center;
+    margin-right: 700px;
+    margin-left: 20px;
+    margin-bottom: 90px;
+    margin-top: -100px;
+    font-size: 23px;
+    font-family: 'Libre Baskerville';
+    padding: 0px;
+    background-image: url('https://i.ibb.co/cNtdSwn/rpblk-ng-ph.png" alt="rpblk-ng-ph" border="0" ');
+    background-repeat: no-repeat;
+    background-position: center;
+   
+}
+.vission, .mission, .goals {
+    color: black;
+   
+    text-shadow: 1px 1px 2px white;
+  
+}
+
+.text{
+
+    color: rgb(0, 0, 0);
+    text-shadow: 1px 1px 2px white;
+  
+}
+
+
+article ul {
+    text-align: center; /* Reset text alignment for unordered lists to left */
+    padding-left: 0; /* Remove default padding */
+}
+
+article ul li {
+    margin-left: 20px; /* Adjust margin to move bullet points closer to the text */
+    align-items: center;
+}
+.image-container {
+    text-align: center;
+  
+}
+
+#logo{
+    width: 200px; 
+    height: auto; 
+    margin: 10px; 
+}
+#logo1{
+    width: 145px; 
+    height: auto; 
+    margin: 45px; 
+}
+#logo {
+    margin-right: 700px; /* Add space to the right of the first logo */
+    margin-left: -690px; /* Move the first logo to the left */
+}
+.or{
+    text-align: center;
+    font-size: x-large;
+}
+
+.in{
+    text-align: center;
+    font-size: xx-large;
+    position: absolute;
+    top: 190px;
+    right: 100px;
+    border: #588157 solid;
+    border-radius: 20px;
+    padding-left: 244px;
+    padding-top: 30px;
+    padding-right: 244px;
+    background-color: #0A5C36;
+}
+.web {
+    width: 300px;
+    height: 343px;
+    position: absolute;
+    left: 62.5%;
+    bottom: 2%;
+  }
+  

@@ -1,0 +1,96 @@
+/* add.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Maname&family=Nunito:ital,wght@1,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.btn {
+  background-color: white;
+  font-size: 50%;
+  color: black;
+  border-radius: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.bg {
+  background-color: #729762;
+}
+
+.relative {
+  position: relative; /* Establishes the context for absolute positioning */
+}
+
+.finance {
+  position: absolute;
+  right: -60%;
+  top: 0;
+  display: none;
+  background-color: #80af81;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+  border-radius: 10px;
+  font-size: 80%;
+  transition-delay: 1s;
+}
+
+.manage {
+  position: absolute;
+  right: -80%;
+  top: 0;
+  display: none;
+  background-color: #00ff04;
+  border: 1px solid #fa5c5c;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+  border-radius: 10px;
+  font-size: 80%;
+  transition-delay: 1s;
+}
+
+.group:hover .submenu {
+  display: block;
+}
+
+.health {
+  position: absolute;
+  right: -110%;
+  top: 0;
+  display: none;
+  background-color: #80af81;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+  border-radius: 10px;
+  font-size: 80%;
+  transition-delay: 1s;
+}
+
+.icon-color {
+  color: #000000;
+}
+
+.icon-color:hover,
+.icon-color:active,
+.icon-color:focus,
+.active {
+  border-left: 5px solid white;
+  border-radius: 5px;
+  padding: 2px;
+}
+
+.head {
+  background-color: #508d4e;
+  padding: 40px;
+  font-family: 'Poppins';
+}
+
+.tinago {
+  position: absolute;
+  top: -30px;
+  right: 30px;
+  width: 8%;
+  height: 18%;
+}
