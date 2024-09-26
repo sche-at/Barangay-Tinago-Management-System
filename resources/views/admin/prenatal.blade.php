@@ -146,22 +146,35 @@
                           
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        <tr class="bg-white hover:bg-gray-100">
-                            <td class="border border-gray-300 px-4 py-2">2024-07-17</td>
-                            <td class="border border-gray-300 px-4 py-2">10:00 AM</td>
-                            <td class="border border-gray-300 px-4 py-2">Meeting</td>
-                            <td class="border border-gray-300 px-4 py-2">Health Center</td>
-                        </tr>
-                        <!-- Add more rows as needed -->
-                    </tbody>
+                    <tbody>
+                             
+                      @foreach ($prenatals as $prenatal)
+                      <tr id={{$prenatal->id}} class="text-center">
+                         <td>{{$prenatal->Date}}</td>
+                         <td>{{$prenatal->Time}}</td>
+                         <td>{{$prenatal->Location}}</td>
+                         <td>{{$prenatal->Activity}}</td>
+                         <td>
+                          <form action="{{ route('admin_delete_prenatal', $prenatal->id) }}" method="POST">
+                              @csrf
+                              @method('DELETE')
+                              <button class="bg-red-500 text-white px-2 py-1 rounded" type="submit">Delete</button>
+                          </form>
+                      </td>
+                          <!-- Add your row data here -->
+                      </tr>
+                      @endforeach
+                      <!-- Add more rows as needed -->
+                  </tbody>
+
                 </table>
             </div>
     
             <!-- Add Schedule Button -->
-            <div class="mt-4">
-                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" onclick="addSchedRow()">Add Schedule</button>
-            </div>
+            <button onclick="addEventRow()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Add Event
+          </button>
+
         </div>
 
 
@@ -170,71 +183,120 @@
   
 
   <script>
-function addSchedRow() {
-    // Get the table body where new rows will be added
-    const tableBody = document.querySelector('#SchedTable tbody');
-
-    // Create a new table row
-    const newRow = document.createElement('tr');
-    newRow.className = 'bg-gray-100'; // Apply styles to new rows if needed
-
-    // Create 4 editable cells (Date, Time, Activity, Location)
-    for (let i = 0; i < 4; i++) {
+    // Function to handle the save button click
+    function savePrenatal(newRow) {
+      const date = newRow.children[0].innerText; // Get text from the first cell
+      const time = newRow.children[1].innerText; // Get text from the second cell
+      const location = newRow.children[2].innerText; // Get text from the third cell
+      const activity = newRow.children[3].innerText;
+  
+      console.log(date);
+      console.log(time);
+      console.log(location);
+      console.log(activity);
+  
+     // Create a FormData object to send the data
+     var formData = new FormData();
+      formData.append('date', date);
+      formData.append('time', time);
+      formData.append('location', location);
+      formData.append('activity', activity);
+       
+  
+      const url = `{{ route('save-prenatal', [':date', ':time', ':location', ':activity']) }}`
+      .replace('date', date)
+      .replace('time', time)
+      .replace('location', location)
+      .replace('activity', activity);
+  console.log(url);
+  
+     
+      // Make an AJAX request to save the event
+      fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token
+    },
+    // body: formData
+  
+  })
+  .then(response => {
+    if (!response.ok) {
+      console.log('werr');
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    if(data.status === '200'){
+      alert("Sched Added");
+    }
+    console.log(data);
+    // Optionally add another row or handle success
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+    }
+  
+  
+    function addEventRow() {
+      // Get the table body where new rows will be added
+      const tableBody = document.querySelector('#SchedTable tbody');
+  
+      // Create a new table row
+      const newRow = document.createElement('tr');
+      newRow.className = 'bg-gray-100'; // Apply styles to new rows if needed
+  
+      // Create 3 editable cells
+      for (let i = 0; i < 4; i++) {
         const newCell = document.createElement('td');
         newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
         newCell.setAttribute('contenteditable', 'true'); // Make cell editable
         newRow.appendChild(newCell);
-    }
-
-    // Create the delete button cell
-    const deleteCell = document.createElement('td');
-    deleteCell.className = 'border border-gray-300 px-4 py-2';
-
-    // Create the delete button
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.className = 'bg-red-500 text-white px-4 py-1 rounded'; // Add styling
-    deleteButton.onclick = function() {
+      }
+  
+      // Create a cell for the delete button
+      const deleteCell = document.createElement('td');
+      deleteCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+  
+      // Create the delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.className = 'bg-red-500 text-white px-2 py-1 rounded'; // Add styling
+      deleteButton.onclick = function() {
         deleteRow(newRow); // Call the delete function with the current row
-    };
-
-    deleteCell.appendChild(deleteButton);
-    newRow.appendChild(deleteCell);
-
-    // Create the save button cell
-    const saveCell = document.createElement('td');
-    saveCell.className = 'border border-gray-300 px-4 py-2';
-
-    // Create the save button
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.className = 'bg-green-500 text-white px-4 py-1 rounded'; // Add styling
-    saveButton.onclick = function() {
-        saveRow(newRow); // Call the save function with the current row
-    };
-
-    saveCell.appendChild(saveButton);
-    newRow.appendChild(saveCell);
-
-    // Add the new row to the table body
-    tableBody.appendChild(newRow);
-}
-
-// Function to delete a specific row
-function deleteRow(row) {
-    row.remove();
-}
-
-// Function to save a specific row (you can implement actual saving logic here)
-function saveRow(row) {
-    const cells = row.querySelectorAll('td[contenteditable="true"]');
-    cells.forEach(cell => {
-        // You can save cell.textContent to a server or database here
-        console.log('Saved:', cell.textContent);
-    });
-}
-
-    
+      };
+  
+      // Append the delete button to the cell
+      deleteCell.appendChild(deleteButton);
+      newRow.appendChild(deleteCell);
+  
+      // Create a cell for the save changes button
+      const saveCell = document.createElement('td');
+      saveCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+  
+      // Create the save changes button
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Save';
+      saveButton.className = 'bg-blue-500 text-white px-2 py-1 rounded'; // Add styling
+      saveButton.onclick = function() {
+        savePrenatal(newRow); // Call the saveEvent function to save the current row
+      };
+  
+      // Append the save button to the cell
+      saveCell.appendChild(saveButton);
+      newRow.appendChild(saveCell);
+  
+      // Add the new row to the table body
+      tableBody.appendChild(newRow);
+    }
+  
+    // Function to delete a specific row
+    function deleteRow(row) {
+      row.remove(); // Remove the row from the table
+    }
   </script>
 
 

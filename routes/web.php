@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PrenatalController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ClientController;
@@ -71,6 +72,10 @@ Route::delete('/delete-event/{eventSched}', [EventController::class, 'destroy'])
 Route::get('/immunization', [ImmunizationController::class, 'immune'])->name('admin.immunization');
 Route::get('/prenatal', [ImmunizationController::class, 'natal'])->name('admin.prenatal');
 Route::get('/referral', [ImmunizationController::class, 'referall'])->name('admin.referral');
+//prenatal
+Route::post('/save-prenatals/{date}/{time}/{location}/{activity}', [PrenatalController::class, 'savePrenatal'])->name('save-prenatal');
+Route::delete('/delete-prenatal/{prenatal}', [PrenatalController::class, 'destroy'])->name('admin_delete_prenatal');
+
 
 //client
 Route::get('/base', [ClientController::class, 'base'])->name('clients.base');

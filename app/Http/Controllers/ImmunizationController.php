@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Http\Controllers\PrenatalControl;
 use Illuminate\Http\Request;
 
 class ImmunizationController extends Controller
@@ -12,7 +12,8 @@ class ImmunizationController extends Controller
     }
     public function natal()
     {
-        return view('admin.prenatal');
+        $prenatals = PrenatalController::index();
+        return view('admin.prenatal', compact("prenatals"));
     }
     public function referall()
     {

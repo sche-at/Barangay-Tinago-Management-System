@@ -9,14 +9,14 @@ class Prenatal extends Model
 {
     use HasFactory;
 
-    protected $table = 'Prenatal';
+    protected $table = 'prenatal';
     public $timestamps = false; // Disable timestamps
 
 
     protected $fillable = [
-        'Date',
-        'Time',
-        'Activity',
-        'Location',
+        'date',
+        'time',
+        'activity',
+        'location',
     ];
 }
