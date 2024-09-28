@@ -215,7 +215,7 @@
     formData.append('notes', notes);
      
 
-    const url = `{{ route('save-immunization', ['vaccine', ':recommended_age', ':dosage', ':venue', ':date', ':time', ':notes']) }}`
+    const url = `{{ route('save-immunization', ['vaccine', 'recommended_age', 'dosage', 'venue', 'date', 'time', 'notes']) }}`
     .replace('vaccine', vaccine)
     .replace('recommended_age', recommended_age)
     .replace('dosage', dosage)
