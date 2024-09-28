@@ -8,20 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Immunization extends Model
 {
     use HasFactory;
-    protected $table = 'Immunization';
+    protected $table = 'immunization';
     public $timestamps = false; // Disable timestamps
 
 
     protected $fillable = [
-        'Blotter_ID',
-        'Blotter_Name',
-        'Date',
-        'Time',
-        'Incident_Type',
-        'Location',
-        'Reported_By',
-        'Responding_Officer',
-         'Status',
-        'Description',
+        'vaccine',
+        'recommended_age',
+        'dosage',
+        'venue',
+        'date',
+        'time',
+        'notes',
     ];
 }

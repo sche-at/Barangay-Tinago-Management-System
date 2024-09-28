@@ -75,7 +75,9 @@ Route::get('/referral', [ImmunizationController::class, 'referall'])->name('admi
 //prenatal
 Route::post('/save-prenatals/{date}/{time}/{location}/{activity}', [PrenatalController::class, 'savePrenatal'])->name('save-prenatal');
 Route::delete('/delete-prenatal/{prenatal}', [PrenatalController::class, 'destroy'])->name('admin_delete_prenatal');
-
+//immunization
+Route::post('/save-immunizations/{vaccine}/{recommended_age}/{dosage}/{venue}/{date}/{time}/{notes}', [ImmunizationController::class, 'saveImmunization'])->name('save-immunization');
+Route::delete('/delete-immunization/{immunization}', [ImmunizationController::class, 'destroy'])->name('admin_delete_immunization');
 
 //client
 Route::get('/base', [ClientController::class, 'base'])->name('clients.base');

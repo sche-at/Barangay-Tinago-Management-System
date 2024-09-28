@@ -133,13 +133,14 @@
                                         <h2 class="text-2xl font-bold mb-4 text-center">Immunization Schedule</h2>
                                         
                                         <!-- Table -->
-                                        <table id="immunizationTable" class="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                                        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg" id="immunizationTable" >
                                             <thead class="bg-gray-200">
                                                 <tr>
                                                     <th class="py-3 px-4 border-b border-gray-300">Vaccine</th>
                                                     <th class="py-3 px-4 border-b border-gray-300">Recommended Age</th>
                                                     <th class="py-3 px-4 border-b border-gray-300">Dosage</th>
-                                                    <th class="py-3 px-4 border-b border-gray-300">Date&Venue</th>
+                                                    <th class="py-3 px-4 border-b border-gray-300">Venue</th>
+                                                    <th class="py-3 px-4 border-b border-gray-300">Date</th>
                                                     <th class="py-3 px-4 border-b border-gray-300">Time</th>
                                                     <th class="py-3 px-4 border-b border-gray-300">Notes</th>
                                                     <th class="py-3 px-4 border-b border-gray-300">Delete</th>
@@ -147,21 +148,34 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- Example Row -->
-                                                <tr class="text-center">
-                                                    <td class="border border-gray-300 px-4 py-2">Hepatitis B</td>
-                                                    <td class="border border-gray-300 px-4 py-2">Birth</td>
-                                                    <td class="border border-gray-300 px-4 py-2">0.5 ml</td>
-                                                    <td class="border border-gray-300 px-4 py-2">Aug. 25, 2024 @ Barangay Hall</td>
-                                                    <td class="border border-gray-300 px-4 py-2">8:00am</td>
-                                                    <td class="border border-gray-300 px-4 py-2">labyu</td>
-                                                </tr>
+                                              @foreach ($immunizations as $immunization)
+                                              <tr id={{$immunization->id}} class="text-center">
+                                                 <td>{{$immunization->vaccine}}</td>
+                                                 <td>{{$immunization->recommended_age}}</td>
+                                                 <td>{{$immunization->dosage}}</td>
+                                                 <td>{{$immunization->venue}}</td>
+                                                 <td>{{$immunization->date}}</td>
+                                                 <td>{{$immunization->time}}</td>
+                                                 <td>{{$immunization->notes}}</td> 
+                                         <td>
+                                                  <form action="{{ route('admin_delete_immunization', $immunization->id) }}" method="POST">
+                                                      @csrf
+                                                      @method('DELETE')
+                                                      <button class="bg-red-500 text-white px-2 py-1 rounded" type="submit">Delete</button>
+                                                  </form>
+                                              </td>
+                                                  <!-- Add your row data here -->
+                                              </tr>
+                                              @endforeach
+                
                                                 <!-- Add more rows as needed -->
                                             </tbody>
                                         </table>
-                                        <button onclick="addImmunizationRow()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                          Add Vaccine
-                                        </button>
+                                   
+                                        <button onclick="addEventRow()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                          Add Event
+                                      </button>
+                    
                                     </div>
 
     </div>
@@ -171,64 +185,130 @@
 </div>
 
 <script>
-  function addImmunizationRow() {
-      // Get the table body where new rows will be added
-      const tableBody = document.querySelector('#immunizationTable tbody');
+  // Function to handle the save button click
+  function saveImmunization(newRow) {
+    const vaccine = newRow.children[0].innerText; // Get text from the first cell
+    const recommended_age = newRow.children[1].innerText; // Get text from the second cell
+    const dosage = newRow.children[2].innerText; // Get text from the third cell
+    const venue = newRow.children[3].innerText;
+    const date = newRow.children[4].innerText;
+    const time = newRow.children[5].innerText;
+    const notes = newRow.children[6].innerText;
+ 
+    
+    console.log(vaccine);
+    console.log(recommended_age);
+    console.log(dosage);
+    console.log(venue);
+    console.log(date);
+    console.log(time);
+    console.log(notes);
 
-      // Create a new table row
-      const newRow = document.createElement('tr');
-      newRow.className = 'text-center bg-gray-100'; // Apply styles to new rows if needed
+   // Create a FormData object to send the data
+   var formData = new FormData();
+    formData.append('vaccine', vaccine);
+    formData.append('recommended_age', recommended_age);
+    formData.append('dosage', dosage);
+    formData.append('venue', venue);
+    formData.append('date', date);
+    formData.append('time', time);
+    formData.append('notes', notes);
+     
 
-      // Create 6 editable cells for Vaccine, Recommended Age, Dosage, Date & Venue, Time, and Notes
-      for (let i = 0; i < 6; i++) {
-          const newCell = document.createElement('td');
-          newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
-          newCell.setAttribute('contenteditable', 'true'); // Make cell editable
-          newRow.appendChild(newCell);
-      }
+    const url = `{{ route('save-immunization', ['vaccine', ':recommended_age', ':dosage', ':venue', ':date', ':time', ':notes']) }}`
+    .replace('vaccine', vaccine)
+    .replace('recommended_age', recommended_age)
+    .replace('dosage', dosage)
+    .replace('venue', venue)
+    .replace('date', date)
+    .replace('time', time)
+    .replace('notes', notes);
+    console.log(url);
+   
+    // Make an AJAX request to save the event
+    fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token
+  },
+  // body: formData
 
-      // Add a Delete button in the 7th cell
-      const deleteCell = document.createElement('td');
-      deleteCell.className = 'border border-gray-300 px-4 py-1';
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.className = 'bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded';
-      deleteButton.onclick = function() {
-          deleteRow(deleteButton);
-      };
-      deleteCell.appendChild(deleteButton);
-      newRow.appendChild(deleteCell);
-
-      // Add a Save button in the 8th cell
-      const saveCell = document.createElement('td');
-      saveCell.className = 'border border-gray-300 px-4 py-1';
-      const saveButton = document.createElement('button');
-      saveButton.textContent = 'Save';
-      saveButton.className = 'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded';
-      saveButton.onclick = function() {
-          saveRow(saveButton);
-      };
-      saveCell.appendChild(saveButton);
-      newRow.appendChild(saveCell);
-
-      // Append the new row to the table body
-      tableBody.appendChild(newRow);
+})
+.then(response => {
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+})
+.then(data => {
+  if(data.status === '200'){
+    alert("Sched Added");
+  }
+  // Optionally add another row or handle success
+})
+.catch((error) => {
+  console.error('Error:', error);
+});
   }
 
-  // Function to delete a row
-  function deleteRow(button) {
-      const row = button.closest('tr');
-      row.remove();
+
+  function addEventRow() {
+    // Get the table body where new rows will be added
+    const tableBody = document.querySelector('#immunizationTable tbody');
+
+    // Create a new table row
+    const newRow = document.createElement('tr');
+    newRow.className = 'bg-gray-100'; // Apply styles to new rows if needed
+
+    
+    for (let i = 0; i < 7; i++) {
+      const newCell = document.createElement('td');
+      newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+      newCell.setAttribute('contenteditable', 'true'); // Make cell editable
+      newRow.appendChild(newCell);
+    }
+
+    // Create a cell for the delete button
+    const deleteCell = document.createElement('td');
+    deleteCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+
+    // Create the delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.className = 'bg-red-500 text-white px-2 py-1 rounded'; // Add styling
+    deleteButton.onclick = function() {
+      deleteRow(newRow); // Call the delete function with the current row
+      
+    };
+
+    // Append the delete button to the cell
+    deleteCell.appendChild(deleteButton);
+    newRow.appendChild(deleteCell);
+
+    // Create a cell for the save changes button
+    const saveCell = document.createElement('td');
+    saveCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+
+    // Create the save changes button
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save';
+    saveButton.className = 'bg-blue-500 text-white px-2 py-1 rounded'; // Add styling
+    saveButton.onclick = function() {
+      saveImmunization(newRow); // Call the saveEvent function to save the current row
+    };
+
+    // Append the save button to the cell
+    saveCell.appendChild(saveButton);
+    newRow.appendChild(saveCell);
+
+    // Add the new row to the table body
+    tableBody.appendChild(newRow);
   }
 
-  // Function to save a row (for demonstration purposes, you can customize this function)
-  function saveRow(button) {
-      const row = button.closest('tr');
-      const cells = row.querySelectorAll('td[contenteditable="true"]');
-      cells.forEach(cell => {
-          cell.setAttribute('contenteditable', 'false'); // Disable editing after saving
-      });
-      alert('Row saved!');
+  // Function to delete a specific row
+  function deleteRow(row) {
+    row.remove(); // Remove the row from the table
   }
 </script>
 

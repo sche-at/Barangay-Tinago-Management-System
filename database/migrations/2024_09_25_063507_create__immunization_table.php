@@ -16,6 +16,13 @@ return new class extends Migration
         Schema::create('Immunization', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->string('vaccine');
+            $table->string('recommended_age');
+            $table->string('dosage');
+            $table->string('venue');
+            $table->string('date');
+            $table->string('time');
+            $table->string('notes');
         });
     }
 
