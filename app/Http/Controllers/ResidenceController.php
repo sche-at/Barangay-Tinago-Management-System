@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Resident;
+use App\Models\BlottersRecord;
 use Illuminate\Http\Request;
 
 class ResidenceController extends Controller
 {
-    public function record()
+    public function record() 
     {
-        return view('admin.blotters');
+        $blottersrecords = BlottersRecord::query()->get();
+        return view('admin.blotters', compact('blottersrecords'));
     }
 
     public function update()

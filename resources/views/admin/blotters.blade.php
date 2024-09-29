@@ -131,7 +131,7 @@
 <div class="p-5">
     <body class="font-sans antialiased bg-gray-100">
         <div class="container mx-auto px-4 py-8">
-    
+          
             <h2 class="text-2xl font-bold mb-4">Barangay Blotter</h2>
     
             <table class="w-full border-collapse border border-gray-200" id="blotterTable">
@@ -152,22 +152,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="bg-white hover:bg-gray-100">
-                        <td class="border border-gray-300 px-4 py-2">001</td>
-                        <td class="border border-gray-300 px-4 py-2">Dispute 07/15/24</td>
-                        <td class="border border-gray-300 px-4 py-2">2024-07-15</td>
-                        <td class="border border-gray-300 px-4 py-2">07:30</td>
-                        <td class="border border-gray-300 px-4 py-2">Domestic Dispute</td>
-                        <td class="border border-gray-300 px-4 py-2">Purok 1, Sitio 2</td>
-                        <td class="border border-gray-300 px-4 py-2">Juan dela Cruz</td>
-                        <td class="border border-gray-300 px-4 py-2">OFF001</td>
-                        <td class="border border-gray-300 px-4 py-2">Resolved</td>
-                        <td class="border border-gray-300 px-4 py-2">Dispute between neighbors over noise.</td>
-                    </tr>
+                  @foreach ($blottersrecords as $blottersrecord)
+                  <tr id={{$blottersrecord->id}} class="text-center">
+                     <td>{{$blottersrecord->id}}</td>
+                     <td>{{$blottersrecord->blotters_name}}</td>
+                     <td>{{$blottersrecord->date}}</td>
+                     <td>{{$blottersrecord->time}}</td>
+                     <td>{{$blottersrecord->incident_type}}</td>
+                     <td>{{$blottersrecord->location}}</td>
+                     <td>{{$blottersrecord->reported_by}}</td>
+                     <td>{{$blottersrecord->responding_officer}}</td>
+                     <td>{{$blottersrecord->status}}</td>
+                     <td>{{$blottersrecord->description}}</td>
+                     <td>
+                      <form action="{{ route('admin_delete_blottersrecord', $blottersrecord->id) }}" method="POST">
+                          @csrf
+                          @method('DELETE')
+                          <button class="bg-red-500 text-white px-2 py-1 rounded" type="submit">Delete</button>
+                      </form>
+                  </td>
+                      <!-- Add your row data here -->
+                  </tr>
+                  @endforeach
                 </tbody>
             </table>
     
-            <button class="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:bg-green-600" onclick="addBlotter()">Add Blotters</button>
+            <button onclick="addEventRow()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Add Blotter
+          </button>
 
 
 </div>
@@ -175,26 +187,148 @@
   
 
   <script>
-    function addBlotter() {
-        // Get the table body where new rows will be added
-        const tableBody = document.querySelector('#blotterTable tbody');
+    // Function to handle the save button click
+    function saveBlottersRecord(newRow) {
+      const blotters_ID = newRow.children[0].innerText; // Get text from the first cell
+      const blotters_name = newRow.children[1].innerText; // Get text from the second cell
+      const date = newRow.children[2].innerText; // Get text from the third cell
+      const time = newRow.children[3].innerText;
+      const incident_type = newRow.children[4].innerText;
+      const location = newRow.children[5].innerText;
+      const reported_by = newRow.children[6].innerText;
+      const responding_officer = newRow.children[7].innerText;
+      const status = newRow.children[8].innerText;
+      const description = newRow.children[9].innerText;
+      
+  
+      console.log(blotters_ID);
+      console.log(blotters_name);
+      console.log(date);
+      console.log(time);
+      console.log(incident_type);
+      console.log(location);
+      console.log(reported_by);
+      console.log(responding_officer);
+      console.log(status);
+      console.log(description);
 
-        // Create a new table row
-        const newRow = document.createElement('tr');
-        newRow.className = 'bg-gray-100'; // Apply styles to new rows if needed
-
-        // Create 10 editable cells
-        for (let i = 0; i < 10; i++) {
-            const newCell = document.createElement('td');
-            newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
-            newCell.setAttribute('contenteditable', 'true'); // Make cell editable
-            newRow.appendChild(newCell);
-        }
-
-        // Add the new row to the table body
-        tableBody.appendChild(newRow);
+      
+  
+     // Create a FormData object to send the data
+     var formData = new FormData();
+      formData.append('blotters_ID', blotters_ID);
+      formData.append('blotters_name', blotters_name);
+      formData.append('date', date);
+      formData.append('time', time);
+      formData.append('incident_type', incident_type);
+      formData.append('location', location);
+      formData.append('reported_by', reported_by);
+      formData.append('responding_officer', responding_officer);
+      formData.append('status', status);
+      formData.append('description', description);
+  
+      const url = `{{ route('save-blottersrecord', ['blotters_ID', 'blotters_name', 'date', 'time', 'incident_type', 'location', 'reported_by','responding_officer', 'status', 'description']) }}`
+      .replace('blotters_ID', blotters_ID)
+      .replace('blotters_name', blotters_name)
+      .replace('date', date)
+      .replace('time', time)
+      .replace('incident_type', incident_type)
+      .replace('location', location)
+      .replace('reported_by', reported_by)
+      .replace('responding_officer', responding_officer)
+      .replace('status', status)
+      .replace('description', description);
+  console.log(url);
+  
+     
+      // Make an AJAX request to save the event
+      fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token
+    },
+    // body: formData
+  
+  })
+  .then(response => {
+    if (!response.ok) {
+    
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
-</script>
+    return response.json();
+  })
+  .then(data => {
+    if(data.status === '200'){
+      alert("Blotters Added");
+    }
+    console.log(data);
+    // Optionally add another row or handle success
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+    }
+  
+  
+    function addEventRow() {
+      // Get the table body where new rows will be added
+      const tableBody = document.querySelector('#blotterTable tbody');
+  
+      // Create a new table row
+      const newRow = document.createElement('tr');
+      newRow.className = 'bg-gray-100'; // Apply styles to new rows if needed
+  
+      // Create 3 editable cells
+      for (let i = 0; i < 10; i++) {
+        const newCell = document.createElement('td');
+        newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+        newCell.setAttribute('contenteditable', 'true'); // Make cell editable
+        newRow.appendChild(newCell);
+      }
+  
+      // Create a cell for the delete button
+      const deleteCell = document.createElement('td');
+      deleteCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+  
+      // Create the delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.className = 'bg-red-500 text-white px-2 py-1 rounded'; // Add styling
+      deleteButton.onclick = function() {
+        deleteRow(newRow); // Call the delete function with the current row
+      };
+  
+      // Append the delete button to the cell
+      deleteCell.appendChild(deleteButton);
+      newRow.appendChild(deleteCell);
+  
+      // Create a cell for the save changes button
+      const saveCell = document.createElement('td');
+      saveCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
+  
+      // Create the save changes button
+      const saveButton = document.createElement('button');
+      saveButton.textContent = 'Save';
+      saveButton.className = 'bg-blue-500 text-white px-2 py-1 rounded'; // Add styling
+      saveButton.onclick = function() {
+        saveBlottersRecord(newRow); // Call the saveEvent function to save the current row
+      };
+  
+      // Append the save button to the cell
+      saveCell.appendChild(saveButton);
+      newRow.appendChild(saveCell);
+  
+      // Add the new row to the table body
+      tableBody.appendChild(newRow);
+    }
+  
+    // Function to delete a specific row
+    function deleteRow(row) {
+      row.remove(); // Remove the row from the table
+    }
+  </script>
+
 
 
     </body>

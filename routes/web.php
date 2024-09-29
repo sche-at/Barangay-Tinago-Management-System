@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BlottersController;
 use App\Http\Controllers\PrenatalController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\BudgetController;
@@ -55,6 +56,10 @@ Route::get('/list', [ResidenceController::class, 'list'])->name('admin.list');
 // Route for adding a new resident
 Route::post('/residence', [ResidenceController::class, 'store'])->name('residence.store');
 
+
+//Blotters record
+Route::post('/save-blottersrecords/{blotters_ID}/{blotters_name}/{date}/{time}/{incident_type}/{location}/{reported_by}/{reponding_officer}/{status}/{description}', [BlottersController::class, 'saveBlottersRecord'])->name('save-blottersrecord');
+Route::delete('/delete-blottersrecord/{blottersrecord}', [BlottersController::class, 'destroy'])->name('admin_delete_blottersrecord');
 
 // Route for displaying the list of residents
 Route::get('/residence-list', [ResidenceController::class, 'list']);

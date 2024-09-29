@@ -190,7 +190,7 @@
     console.log(typeOfEvent);
     console.log(dateAndVenue);
     console.log(tasksAssigned);
-    console.log('asdddgg')
+   
 
    // Create a FormData object to send the data
    var formData = new FormData();
@@ -213,7 +213,7 @@
     'Content-Type': 'application/json',
     'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token
   },
-  // body: formData
+   body: formData
 
 })
 .then(response => {
@@ -247,6 +247,7 @@
       const newCell = document.createElement('td');
       newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
       newCell.setAttribute('contenteditable', 'true'); // Make cell editable
+      newCell.setAttribute('id' , 'cell_'+i);
       newRow.appendChild(newCell);
     }
 
@@ -275,7 +276,12 @@
     saveButton.textContent = 'Save';
     saveButton.className = 'bg-blue-500 text-white px-2 py-1 rounded'; // Add styling
     saveButton.onclick = function() {
-      saveEvent(newRow); // Call the saveEvent function to save the current row
+      validateTable();
+
+      if(validateTable() == true){
+        saveEvent(newRow);
+      }
+      // saveEvent(newRow); // Call the saveEvent function to save the current row
     };
 
     // Append the save button to the cell
@@ -290,6 +296,24 @@
   function deleteRow(row) {
     row.remove(); // Remove the row from the table
   }
+
+  function validateTable(newROw) {
+  const cell_1 = document.getElementById('cell_0').innerText.trim();
+  const cell_2 = document.getElementById('cell_1').innerText.trim();
+  const cell_3 = document.getElementById('cell_2').innerText.trim();
+
+  if (!cell_1 || !cell_2 || !cell_3) {
+    alert('All fields are required!');
+    return false;
+  }else {
+    return true;
+   // saveEvent(newRow);
+  }
+  
+
+  // Proceed with form submission or further processing
+ // alert('Form is valid!');
+}
 </script>
 
   </body>

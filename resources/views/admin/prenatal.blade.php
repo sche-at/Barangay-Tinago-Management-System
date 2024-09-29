@@ -203,7 +203,7 @@
       formData.append('activity', activity);
        
   
-      const url = `{{ route('save-prenatal', [':date', ':time', ':location', ':activity']) }}`
+      const url = `{{ route('save-prenatal', ['date', 'time', 'location', 'activity']) }}`
       .replace('date', date)
       .replace('time', time)
       .replace('location', location)
