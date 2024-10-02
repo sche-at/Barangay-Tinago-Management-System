@@ -120,7 +120,7 @@
       </div>
 
                               <!-- Heading-->
-                              <div class="w-4/5 ">
+                              <div class="w-4/5 h-auto bg-cover bg-center" style="background-image: url('{{ asset('storage/bg.png') }}'); background-size: contain; background-position: center; background-repeat: no-repeat;">
                                 <h1 class="head text-3xl font-bold mb-6 ">Barangay Tinago</h1>
                                 <img src=" {{URL ('storage/tinago.png')}}" alt="tinago" class="tinago" >
                               

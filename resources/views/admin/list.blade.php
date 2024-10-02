@@ -122,10 +122,51 @@
       </div>
 
                               <!-- Heading-->
-  <div class="w-4/5">
-    <h1 class="head text-3xl font-bold ">Barangay Tinago</h1>
-    <img src=" {{URL ('storage/tinago.png')}}" alt="tinago" class="tinago" >
-  </div>
+                              <div class="w-4/5 h-auto bg-cover bg-center" style="background-image: url('{{ asset('storage/bg.png') }}'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+
+
+                          
+
+                                <h1 class="head text-3xl font-bold ">Barangay Tinago</h1>
+                                <img src=" {{URL ('storage/tinago.png')}}" alt="tinago" class="tinago" >
+                                
+                                <!-- Inserted Code Here -->
+                                <div class="p-5">
+                                  <body class="font-sans antialiased bg-gray-100">
+                                      <div class="container mx-auto px-4 py-8">
+                                          <!-- Flexbox to align heading and search bar -->
+                                          <div class="flex justify-between items-center mb-5">
+                                            <h2 class="text-2xl font-bold mb-5 border-2 border-green-700 text-center bg-green-600 rounded-lg px-5 py-2 w-[50%] mx-auto">Residence List</h2>
+                              
+                                              <!-- Search bar -->
+                                              <input type="text" placeholder="Residents/Purok" class="border border-gray-300 rounded-lg px-4 py-2 w-[8%] text-xs focus:outline-none focus:ring-1 focus:ring-green-500">
+                                            </div>
+                              
+                                          <div class="overflow-x-auto">
+                                              <table class="w-full border-collapse border border-gray-200" id="SchedTable">
+                                                  <thead>
+                                                      <tr class="bg-gray-200">
+                                                          <th class="border border-gray-300 px-4 py-2">Full Name</th>
+                                                          <th class="border border-gray-300 px-4 py-2">Contact Number</th>
+                                                          <th class="border border-gray-300 px-4 py-2">Purok</th>
+                                                          <th class="border border-gray-300 px-4 py-2"></th>
+                                                      </tr>
+                                                  </thead>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </body>
+                              </div>
+                              
+                            
+                                            <!-- Add Schedule Button -->
+                                        
+                                        </div>
+                                    </body>
+                                </div>
+                                <!-- End of Inserted Code -->
+                            </div>
+                            
     </body>
     </html>
 

@@ -122,8 +122,8 @@
       </div>
 
                               <!-- Heading-->
-  <div class="w-4/5">
-    <h1 class="head text-3xl font-bold ">Barangay Tinago</h1>
+                              <div class="w-4/5 h-auto bg-cover bg-center" style="background-image: url('{{ asset('storage/bg.png') }}'); background-size: contain; background-position: center; background-repeat: no-repeat;">
+                                <h1 class="head text-3xl font-bold ">Barangay Tinago</h1>
     <img src=" {{URL ('storage/tinago.png')}}" alt="tinago" class="tinago" >
 
 
@@ -254,6 +254,7 @@
         const newCell = document.createElement('td');
         newCell.className = 'border border-gray-300 px-4 py-2'; // Add styling
         newCell.setAttribute('contenteditable', 'true'); // Make cell editable
+        newCell.setAttribute('id' , 'cell_'+i);
         newRow.appendChild(newCell);
       }
   
@@ -282,7 +283,11 @@
       saveButton.textContent = 'Save';
       saveButton.className = 'bg-blue-500 text-white px-2 py-1 rounded'; // Add styling
       saveButton.onclick = function() {
-        savePrenatal(newRow); // Call the saveEvent function to save the current row
+        validateTable();
+
+      if(validateTable() == true){
+        savePrenatal(newRow);
+      } // Call the saveEvent function to save the current row
       };
   
       // Append the save button to the cell
@@ -297,6 +302,21 @@
     function deleteRow(row) {
       row.remove(); // Remove the row from the table
     }
+    function validateTable(newROw) {
+  const cell_1 = document.getElementById('cell_0').innerText.trim();
+  const cell_2 = document.getElementById('cell_1').innerText.trim();
+  const cell_3 = document.getElementById('cell_2').innerText.trim();
+  const cell_4 = document.getElementById('cell_3').innerText.trim();
+
+
+  if (!cell_1 || !cell_2 || !cell_3|| !cell_4) {
+    alert('All fields are required!');
+    return false;
+  }else {
+    return true;
+   // saveEvent(newRow);
+  }
+}
   </script>
 
 
