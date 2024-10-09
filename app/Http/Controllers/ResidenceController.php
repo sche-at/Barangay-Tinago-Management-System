@@ -14,10 +14,6 @@ class ResidenceController extends Controller
         return view('admin.blotters', compact('blottersrecords'));
     }
 
-    public function update()
-    {
-        return view('admin.update');
-    }
     public function store(Request $request)
     {
        try{
@@ -36,7 +32,7 @@ class ResidenceController extends Controller
             'contact_number' => ['required','string','max:15'],
             'family_members' => ['nullable','array','max:255'],
         ]);
-    // dd($request->family_members);
+   
         // Create a new Resident instance and save the validated data
         $resident = Resident::create($incomingFields);
          // Populate the family_members column using the received array
@@ -50,8 +46,52 @@ class ResidenceController extends Controller
     }
 }
 
-    public function list(){
-        return view('admin.list');
-    }
+public function list()
+{
+    $residents = Resident::all(); // Fetch all resident records
+    return view('admin.list', compact('residents'));
+}
+public function edit($id)
+{
+    $resident = Resident::findOrFail($id); // Fetch resident data based on ID
+    return view('admin.update', compact('resident')); // Pass data to the view
+}
+
+public function update(Request $request, $id)
+{
+    $resident = Resident::findOrFail($id); // Find the resident
+
+    // Validate the incoming request data
+    $incomingFields = $request->validate([
+        'full_name' => ['required', 'string', 'max:255'],
+        'sex' => ['required', 'string'],
+        'date_of_birth' => ['required', 'date'],
+        'age' => ['required', 'integer'],
+        'civil_status' => ['required', 'string'],
+        'purok' => ['required', 'integer'],
+        'address' => ['required', 'string', 'max:255'],
+        'educational_level' => ['required', 'string'],
+        'occupation' => ['nullable', 'string', 'max:255'],
+        'employment_status' => ['required', 'string'],
+        'contact_number' => ['required', 'string', 'max:15'],
+        'family_members' => ['nullable', 'array', 'max:255'],
+    ]);
+
+    // Update the resident with validated data
+    $resident->update($incomingFields);
+    // Populate the family_members column using the received array
+    $resident->family_members = $request->input('family_members');
+    $resident->save();
+
+    return redirect()->route('admin.list')->with('success', 'Resident information updated successfully.');
+}
+public function destroy($id)
+{
+    $resident = Resident::findOrFail($id);
+    $resident->delete();
+
+    return response()->json(['success' => true]);
+}
+
     
 }

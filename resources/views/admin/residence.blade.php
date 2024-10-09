@@ -42,10 +42,10 @@
                       </a>
                   </li>
                   <li>
-                      <a href="/update" class="flex items-center space-x-2 cursor-pointer hover:underline">
+                      {{-- <a href="/update" class="flex items-center space-x-2 cursor-pointer hover:underline">
                           <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                           <span>Update Resident</span>
-                      </a>
+                      </a> --}}
                   </li>
                   <li>
                       <a href="/blotters" class="flex items-center space-x-2 cursor-pointer hover:underline">
@@ -57,7 +57,7 @@
                       <a href="/list" class="flex items-center space-x-2 cursor-pointer hover:underline">
                           <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                           <span>Residence List</span>
-                      </a>
+                      </a> 
                   </li>
               </ul>
           </div>
@@ -80,7 +80,7 @@
             </a>
             <a href="/expense" class="flex items-center space-x-2 cursor-pointer hover:underline">
                 <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
-                <span>Expenses</span>
+                <span>Transaction Reporting</span>
             </a>
         </div>
         
@@ -108,10 +108,10 @@
                   <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                   <span>Pre-Natal Schedule</span>
               </a>
-              <a href="/referral" class="flex items-center space-x-2 cursor-pointer hover:underline">
+              {{-- <a href="/referral" class="flex items-center space-x-2 cursor-pointer hover:underline">
                   <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                   <span>Referral</span>
-              </a>
+              </a> --}}
           </div>
           
         </div>

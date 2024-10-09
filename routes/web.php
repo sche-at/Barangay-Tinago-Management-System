@@ -63,6 +63,10 @@ Route::delete('/delete-blottersrecord/{blottersrecord}', [BlottersController::cl
 
 // Route for displaying the list of residents
 Route::get('/residence-list', [ResidenceController::class, 'list']);
+Route::get('/residents/list', [ResidenceController::class, 'list'])->name('residents.list');
+Route::delete('/residents/{id}', [ResidenceController::class, 'destroy']);
+Route::get('/admin/residence/{id}/edit', [ResidenceController::class, 'edit'])->name('residence.edit');
+Route::put('/admin/residence/{id}', [ResidenceController::class, 'update'])->name('residence.update');
 
 //Financial
 Route::get('/budget', [BudgetController::class, 'budget'])->name('admin.budget');

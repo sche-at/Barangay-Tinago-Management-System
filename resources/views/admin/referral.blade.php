@@ -77,7 +77,7 @@
             </a>
             <a href="/expense" class="flex items-center space-x-2 cursor-pointer hover:underline">
                 <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
-                <span>Expenses</span>
+                <span>Transaction Reporting</span>
             </a>
         </div>
         

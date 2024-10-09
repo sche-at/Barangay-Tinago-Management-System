@@ -42,12 +42,12 @@
                           <span>Add Resident</span>
                       </a>
                   </li>
-                  <li>
+                  {{-- <li>
                       <a href="/update" class="flex items-center space-x-2 cursor-pointer hover:underline">
                           <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                           <span>Update Resident</span>
                       </a>
-                  </li>
+                  </li> --}}
                   <li>
                       <a href="/blotters" class="flex items-center space-x-2 cursor-pointer hover:underline">
                           <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
@@ -77,7 +77,7 @@
             </a>
             <a href="/expense" class="flex items-center space-x-2 cursor-pointer hover:underline">
                 <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
-                <span>Expenses</span>
+                <span>Transaction Reporting</span>
             </a>
         </div>
         
@@ -103,10 +103,10 @@
                   <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                   <span>Pre-Natal Schedule</span>
               </a>
-              <a href="/referral" class="flex items-center space-x-2 cursor-pointer hover:underline">
+              {{-- <a href="/referral" class="flex items-center space-x-2 cursor-pointer hover:underline">
                   <span class="inline-block w-2 h-2 rounded-full bg-black"></span>
                   <span>Referral</span>
-              </a>
+              </a> --}}
           </div>
           
         </div>
@@ -143,30 +143,120 @@
                                             </div>
                               
                                           <div class="overflow-x-auto">
-                                              <table class="w-full border-collapse border border-gray-200" id="SchedTable">
-                                                  <thead>
-                                                      <tr class="bg-gray-200">
-                                                          <th class="border border-gray-300 px-4 py-2">Full Name</th>
-                                                          <th class="border border-gray-300 px-4 py-2">Contact Number</th>
-                                                          <th class="border border-gray-300 px-4 py-2">Purok</th>
-                                                          <th class="border border-gray-300 px-4 py-2"></th>
-                                                      </tr>
-                                                  </thead>
-                                              </table>
-                                          </div>
-                                      </div>
-                                  </body>
-                              </div>
-                              
-                            
-                                            <!-- Add Schedule Button -->
-                                        
-                                        </div>
-                                    </body>
-                                </div>
-                                <!-- End of Inserted Code -->
-                            </div>
-                            
+                                           <!-- Table Structure -->
+<table class="w-full border-collapse border border-gray-200" id="SchedTable">
+  <thead>
+      <tr class="bg-gray-200">
+          <th class="border border-gray-300 px-4 py-2">Full Name</th>
+          <th class="border border-gray-300 px-4 py-2">Contact Number</th>
+          <th class="border border-gray-300 px-4 py-2">Purok</th>
+          <th class="border border-gray-300 px-4 py-2"></th>
+      </tr>
+  </thead>
+  <tbody>
+      @foreach($residents as $resident)
+          <tr class="bg-gray-100 text-center">
+              <td class="border border-gray-300 px-4 py-2">{{ $resident->full_name }}</td>
+              <td class="border border-gray-300 px-4 py-2">{{ $resident->contact_number }}</td>
+              <td class="border border-gray-300 px-6 py-2 w-32">{{ $resident->purok }}</td>
+              <td class="border border-gray-300 px-6 py-2 w-32">
+                  <button class="more-details-toggle bg-blue-500 text-white px-4 py-1 rounded" data-resident="{{ json_encode($resident) }}">More Details</button>
+              </td>
+          </tr>
+      @endforeach
+  </tbody>
+</table>
+
+<!-- Modal Structure -->
+<div id="detailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+      <h2 class="text-xl font-bold mb-4">Resident Details</h2>
+      <div id="modalContent"></div>
+      <div class="flex justify-between mt-4">
+          <button id="closeModal" class="bg-red-500 text-white px-4 py-2 rounded">Close</button>
+          <button id="updateModal" class="bg-yellow-500 text-white px-4 py-2 rounded">Update</button>
+          <button id="deleteModal" class="bg-red-700 text-white px-4 py-2 rounded">Delete</button>
+      </div>
+  </div>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const buttons = document.querySelectorAll('.more-details-toggle');
+      const modal = document.getElementById('detailsModal');
+      const modalContent = document.getElementById('modalContent');
+      const closeModalButton = document.getElementById('closeModal');
+      const updateModalButton = document.getElementById('updateModal');
+      const deleteModalButton = document.getElementById('deleteModal');
+      let currentResidentId = null; // To store the current resident's ID for update and delete actions
+
+      buttons.forEach(button => {
+          button.addEventListener('click', function () {
+              const resident = JSON.parse(this.getAttribute('data-resident'));
+              currentResidentId = resident.id; // Store the resident's ID
+
+              modalContent.innerHTML = `
+                  <p><strong>Full Name:</strong> ${resident.full_name}</p>
+                  <p><strong>Sex:</strong> ${resident.sex}</p>
+                  <p><strong>Date of Birth:</strong> ${resident.date_of_birth}</p>
+                  <p><strong>Age:</strong> ${resident.age}</p>
+                  <p><strong>Civil Status:</strong> ${resident.civil_status}</p>
+                  <p><strong>Purok:</strong> ${resident.purok}</p>
+                  <p><strong>Address:</strong> ${resident.address}</p>
+                  <p><strong>Educational Level:</strong> ${resident.educational_level}</p>
+                  <p><strong>Occupation:</strong> ${resident.occupation}</p>
+                  <p><strong>Employment Status:</strong> ${resident.employment_status}</p>
+                  <p><strong>Contact Number:</strong> ${resident.contact_number}</p>
+                  <p><strong>Family Members:</strong> ${resident.family_members ? resident.family_members.join(', ') : 'N/A'}</p>
+              `;
+
+              modal.classList.remove('hidden');
+          });
+      });
+
+      closeModalButton.addEventListener('click', function () {
+          modal.classList.add('hidden');
+      });
+
+      updateModalButton.addEventListener('click', function () {
+    // Redirect to the update route (adjust the route as necessary)
+    window.location.href = `/admin/residence/${currentResidentId}/edit`; // Ensure this route is correct
+});
+
+
+      deleteModalButton.addEventListener('click', function () {
+          if (confirm('Are you sure you want to delete this resident? This action cannot be undone.')) {
+              // Send a DELETE request to your delete route (adjust the route as necessary)
+              fetch(`/residents/${currentResidentId}`, {
+                  method: 'DELETE',
+                  headers: {
+                      'X-CSRF-TOKEN': '{{ csrf_token() }}', // Ensure you include the CSRF token
+                      'Content-Type': 'application/json',
+                  },
+              })
+              .then(response => {
+                  if (response.ok) {
+                      // Find the row in the table and remove it
+                      const row = buttons[Array.from(buttons).indexOf(deleteModalButton)].closest('tr');
+                      row.remove(); // Remove the row from the table
+                      modal.classList.add('hidden'); // Close the modal after deletion
+                  } else {
+                      alert('Error deleting the resident. Please try again.');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('An error occurred while deleting the resident.');
+              });
+          }
+      });
+  });
+</script>
+
+
+
+
     </body>
     </html>
 
