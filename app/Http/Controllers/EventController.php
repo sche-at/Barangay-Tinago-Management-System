@@ -1,51 +1,92 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use Illuminate\Http\Request;
-use App\Models\EventSched; // Assume this is your model for the event_sched table
-use Exception;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
 class EventController extends Controller
 {
-  public static function index() {
-    $events = EventSched::query()->get();
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
 
-    return $events;
-}
+        $user = Auth::user();
 
-public function saveEvent(Request $request, $type_of_event, $date_and_venue, $tasks_assigned) {
-  
-  $incomingFields = [
-    'type_of_event' => $type_of_event,
-       'date_and_venue' => $date_and_venue,
-      'tasks_assigned' => $tasks_assigned
-      // Assuming tasks_assigned is an array
-   ];
+        if($user->user_type == 'captain' || $user->user_type == 'event'){
+            $events = Event::all();
+            // Return the view with the blotters data
+            return view('admin.events', compact('events'));
+            // return view('pages.events');
+        }else{
+            return redirect(route('dashboard'));
+        }        
+    }
 
-  try {
-      // Create a new EventSched instance and save the validated data
-     EventSched::create($incomingFields);
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
 
-    return json_encode([
-      'status'=> '200',
-      'message'=> "Save Successfully"
-    ]);
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'event_type' => 'required|string|max:255',
+            'event_venue' => 'required|string|max:255',
+            'task_assigned' => 'required|string|max:255',
+        ]);
 
-  } catch (\Exception $er) {
-      dd($er);
-  }
-}
+        // Create a new Blotter entry
+        $event = new Event();
+        $event->event_type = $request->event_type;
+        $event->event_venue = $request->event_venue;
+        $event->task_assigned = $request->task_assigned;
+        $event->save();
 
-public function destroy(EventSched $eventSched) {
+        return response()->json(['message' => 'Event saved successfully!']); // Return success message
+    }
 
-  //dd($eventSched->id);
-  try {
-      $eventSched->delete();
+    /**
+     * Display the specified resource.
+     */
+    public function show(Event $event)
+    {
+        //
+    }
 
-      return redirect()->route('admin.event')->with("message", "Event Deleted successfully");
-  } catch (\Exception $er) {
-      // Log the error or display a user-friendly message
-      dd($er);
-  }
-}
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Event $event)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Event $event)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $event = Event::findOrFail($id);
+        $event->delete();
+
+        return response()->json(['message' => 'Event deleted successfully!'], 200);
+    }
 }

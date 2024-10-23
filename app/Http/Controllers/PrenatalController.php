@@ -4,47 +4,86 @@ namespace App\Http\Controllers;
 
 use App\Models\Prenatal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PrenatalController extends Controller
 {
-    public static function index() {
-        $prenatals = Prenatal::query()->get();
-    
-        return $prenatals;
-}
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $user = Auth::user();
 
-public function savePrenatal(Request $request, $date, $time, $location, $activity) {
-
-    $incomingFields = [
-      'date' => $date,
-      'time' => $time,
-        'location' => $location,
-        'activity' => $activity
-     ];
-  
-    try {
+        if($user->user_type == 'captain' || $user->user_type == 'health'){
+            $prenatals = Prenatal::all();
         
-       Prenatal::create($incomingFields);
-  
-      return json_encode([
-        'status'=> '200',
-        'message'=> "Save Successfully"
-      ]);
-  
-    } catch (\Exception $er) {
-        dd($er);
+            // Return the view with the blotters data
+            return view('admin.prenatal', compact('prenatals'));
+        }else{
+            return redirect(route('dashboard'));
+        }
     }
-  }
-  public function destroy(Prenatal $prenatal) {
 
-   
-    try {
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'activity' => 'required|string|max:255',
+            'venue' => 'required|string|max:255',
+        ]);
+
+        // Create a new Blotter entry
+        $prenatal = new Prenatal();
+        $prenatal->activity = $request->activity;
+        $prenatal->venue = $request->venue;
+        $prenatal->save();
+
+        return response()->json(['message' => 'Immunization saved successfully!']); // Return success message
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Prenatal $prenatal)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Prenatal $prenatal)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Prenatal $prenatal)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $prenatal = Prenatal::findOrFail($id);
         $prenatal->delete();
-  
-        return redirect()->route('admin.prenatal')->with("message", "Event Deleted successfully");
-    } catch (\Exception $er) {
-        
-        dd($er);
+
+        return response()->json(['message' => 'Immunization deleted successfully!'], 200);
     }
-  }
-  } 
+}

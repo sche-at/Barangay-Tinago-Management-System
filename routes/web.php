@@ -1,96 +1,87 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\BlottersController;
-use App\Http\Controllers\PrenatalController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\signupController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResidenceController;
-use App\Http\Controllers\ImmunizationController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use App\Http\Controllers\BlooterController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ImmunizeController;
+use App\Http\Controllers\PrenatalController;
+use App\Http\Controllers\TransactionsController;
+use App\Http\Controllers\UserController;
+use App\Models\Budget;
+use Illuminate\Database\Events\TransactionCommitted;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('admin.home');
+    return redirect()->route('login');
 });
 
-//SIGN UP
-Route::get('/signup', [signupController::class, 'register']);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::post('/signup', [SignupController::class, 'create']);
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-Route::post('/home', [SignupController::class, 'home']);
-
-
-
-
-//admin
-
-    Route::get('/home', [AdminController::class, 'home'])->name('admin.home');
-    Route::get('/residence', [AdminController::class, 'residence'])->name('admin.residence');
-    Route::get('/finance', [AdminController::class, 'finance'])->name('admin.finance');
-    Route::get('/event', [AdminController::class, 'event'])->name('admin.event');
-    Route::get('/immunization', [AdminController::class, 'health'])->name('admin.health');
-    
- 
+    Route::get('/about-us', [DashboardController::class, 'index'])->name('dashboard.about-us');
+    Route::get('/viewprofile', [DashboardController::class, 'profile'])->name('dashboard.profile');
+    Route::get('/changepassword', [DashboardController::class, 'changepassword'])->name('dashboard.changepassword');
+    Route::post('/change-password', [DashboardController::class, 'updatePassword'])->name('update.password');
 
 
-//residence
-Route::get('/blotters', [ResidenceController::class, 'record'])->name('admin.blotters');
-Route::get('/update', [ResidenceController::class, 'update'])->name('admin.update');
-Route::get('/list', [ResidenceController::class, 'list'])->name('admin.list');
-// Route::get('/store', [ResidenceController::class, 'store'])->name('residence.store');
+    Route::get('/addresidence', [ResidenceController::class, 'index'])->name('residence.addresidence');
+    Route::post('/residence/store', [ResidenceController::class, 'store'])->name('residence.store');
+    Route::get('/residenceview', [ResidenceController::class, 'residenceview'])->name('residence.view');
+    // Route::post('residences/{id}', [ResidenceController::class, 'update'])->name('residences.update');
+    // Route::delete('residences/{id}', [ResidenceController::class, 'destroy'])->name('residences.destroy');
+    // Route::get('residences/view', [ResidenceController::class, 'residenceview'])->name('residences.view');
 
-// Route for adding a new resident
-Route::post('/residence', [ResidenceController::class, 'store'])->name('residence.store');
+    Route::get('residences/{id}', [ResidenceController::class, 'show'])->name('residences.show');
+    Route::post('residences', [ResidenceController::class, 'store'])->name('residences.store');
+    // Route::post('residences/{id}', [ResidenceController::class, 'update'])->name('residences.update');
+    Route::put('residences/{id}', [ResidenceController::class, 'update'])->name('residences.update'); // This should exist
+    Route::delete('residencesdelete/{id}', [ResidenceController::class, 'destroy'])->name('residences.destroy');
 
+    Route::get('/blooters', [BlooterController::class, 'index'])->name('blooter.blooters');
+    Route::post('/blotteradd', [BlooterController::class, 'store'])->name('blooter.addblotter');
+    Route::delete('/blotters/{id}', [BlooterController::class, 'destroy']);
 
-//Blotters record
-Route::post('/save-blottersrecords/{blotters_ID}/{blotters_name}/{date}/{time}/{incident_type}/{location}/{reported_by}/{reponding_officer}/{status}/{description}', [BlottersController::class, 'saveBlottersRecord'])->name('save-blottersrecord');
-Route::delete('/delete-blottersrecord/{blottersrecord}', [BlottersController::class, 'destroy'])->name('admin_delete_blottersrecord');
+    Route::get('/events', [EventController::class, 'index'])->name('events');
+    Route::post('/insertevent', [EventController::class, 'store']);
+    Route::delete('/eventdelete/{id}', [EventController::class, 'destroy']);
 
-// Route for displaying the list of residents
-Route::get('/residence-list', [ResidenceController::class, 'list']);
-Route::get('/residents/list', [ResidenceController::class, 'list'])->name('residents.list');
-Route::delete('/residents/{id}', [ResidenceController::class, 'destroy']);
-Route::get('/admin/residence/{id}/edit', [ResidenceController::class, 'edit'])->name('residence.edit');
-Route::put('/admin/residence/{id}', [ResidenceController::class, 'update'])->name('residence.update');
+    Route::get('/immunize', [ImmunizeController::class, 'index'])->name('immunize');
+    Route::post('/insertimmunize', [ImmunizeController::class, 'store']);
+    Route::delete('/immunizedelete/{id}', [ImmunizeController::class, 'destroy']);
 
-//Financial
-Route::get('/budget', [BudgetController::class, 'budget'])->name('admin.budget');
-Route::get('/expense', [BudgetController::class, 'expense'])->name('admin.expense');
+    Route::get('/prenatal', [PrenatalController::class, 'index'])->name('prenatal');
+    Route::post('/insertprenatal', [PrenatalController::class, 'store']);
+    Route::delete('/prenataldelete/{id}', [PrenatalController::class, 'destroy']);
 
-//event
-Route::post('/save-events/{type_of_event}/{date_and_venue}/{tasks_assigned}', [EventController::class, 'saveEvent'])->name('save-event');
-//Route::post('/save-events', [EventController::class, 'saveEvent'])->name('save-event');
-Route::delete('/delete-event/{eventSched}', [EventController::class, 'destroy'])->name('admin_delete_event');
+    Route::get('budgetplan', [BudgetController::class, 'index'])->name('budget.budgetplan');
+    Route::get('/exportbudget/{id}', [BudgetController::class, 'export'])->name('budget.exportbudget');
+    Route::post('/insertplanning', [BudgetController::class, 'store']);
+    Route::delete('/palnningdelete/{id}', [BudgetController::class, 'destroy']);
 
-//health
-Route::get('/immunization', [ImmunizationController::class, 'immune'])->name('admin.immunization');
-Route::get('/prenatal', [ImmunizationController::class, 'natal'])->name('admin.prenatal');
-Route::get('/referral', [ImmunizationController::class, 'referall'])->name('admin.referral');
-//prenatal
-Route::post('/save-prenatals/{date}/{time}/{location}/{activity}', [PrenatalController::class, 'savePrenatal'])->name('save-prenatal');
-Route::delete('/delete-prenatal/{prenatal}', [PrenatalController::class, 'destroy'])->name('admin_delete_prenatal');
-//immunization
-Route::post('/save-immunizations/{vaccine}/{recommended_age}/{dosage}/{venue}/{date}/{time}/{notes}', [ImmunizationController::class, 'saveImmunization'])->name('save-immunization');
-Route::delete('/delete-immunization/{immunization}', [ImmunizationController::class, 'destroy'])->name('admin_delete_immunization');
+    Route::get('/users', [UserController::class, 'index'])->name('users.users');
+    Route::post('/insertuser', [UserController::class, 'store']);
+    Route::delete('/userdelete/{id}', [UserController::class, 'destroy']);
+    Route::put('/users/reset/{id}', [UserController::class, 'update'])->name('user.update');
 
-//client
-Route::get('/base', [ClientController::class, 'base'])->name('clients.base');
-Route::get('/eventannounce', [ClientController::class, 'eventannounce'])->name('clients.eventannounce');
-Route::get('/healthannounce', [ClientController::class, 'healthannounce'])->name('clients.healthannounce');
-Route::get('/history', [ClientController::class, 'history'])->name('clients.history');
-Route::get('/complaints', [ClientController::class, 'complaints'])->name('clients.complaints');
+    Route::get('/comments', [CommentController::class, 'index'])->name('comments.comments');
+    Route::post('/comments', [CommentController::class, 'store'])->middleware('auth');
+    Route::get('/getcomments', [CommentController::class, 'comments'])->name('comments.list');
+
+    Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.transactions');
+    Route::get('/history', [TransactionsController::class, 'history'])->name('transactions.history');
+    Route::post('/transactions/store', [TransactionsController::class, 'store'])->name('transactions.store');
+    Route::get('/report', [TransactionsController::class, 'report'])->name('transactions.report');
+
+});
+
+require __DIR__.'/auth.php';
