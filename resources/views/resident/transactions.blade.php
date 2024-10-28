@@ -32,6 +32,7 @@
                     <option value="Barangay Certificate">Barangay Certificate</option>
                     <option value="Lot Clearance">Lot Clearance</option>
                     <option value="Certificate of Indigency">Certificate of Indigency</option>
+                    <option value="Others">Others</option>
                 </select>
               </div>
               <div class="mb-3">

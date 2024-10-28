@@ -7,7 +7,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <i class="fas fa-table me-1"></i>
-                        Barangay Blooter
+                        Barangay Blotter
                     </div>
                     <!-- Add Blotter Button -->
                     <button class="btn btn-primary" id="addBlotterBtn" data-bs-toggle="modal" data-bs-target="#blotterModal">Add Blotter</button>
@@ -17,7 +17,8 @@
                         <thead>
                             <tr>
                                 <th>Blotter Id</th>
-                                <th>Reported By</th>
+                                <th>Respondent</th> 
+                                <th>Complainant</th>
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Incident Type</th>
@@ -30,6 +31,7 @@
                             @foreach($bloters as $blooter)
                                 <tr>
                                     <td>{{ $blooter->id }}</td>
+                                    <td>{{ $blooter->blotters_name }}</td> 
                                     <td>{{ $blooter->reported_by }}</td>
                                     <td>{{ $blooter->created_at->format('F j, Y') }}</td> <!-- For the full month name and year -->
                                     <td>{{ $blooter->created_at->format('h:i A') }}</td> <!-- For time with AM/PM -->
@@ -58,7 +60,7 @@
                 <div class="modal-body">
                     <form id="blotterForm">
                         <div class="mb-3">
-                            <label for="blottersName" class="form-label">Blotters Name</label>
+                            <label for="blottersName" class="form-label">Respondent</label>
                             <input type="text" class="form-control" id="blottersName" required>
                         </div>
                         <div class="mb-3">
@@ -70,7 +72,7 @@
                             <input type="text" class="form-control" id="location" required>
                         </div>
                         <div class="mb-3">
-                            <label for="reportedBy" class="form-label">Reported By</label>
+                            <label for="reportedBy" class="form-label">Complainant</label>
                             <input type="text" class="form-control" id="reportedBy" required>
                         </div>
                         <div class="mb-3">
@@ -113,7 +115,7 @@ document.getElementById('saveBlotterBtn').addEventListener('click', function() {
         if (response.ok) {
             $('#blotterModal').modal('hide');
             alert('Blotter saved successfully!'); // Alert success message
-                location.reload(); // Reload the page after saving
+            location.reload(); // Reload the page after saving
         } else {
             return response.json().then(data => {
                 alert(data.message || 'Error saving blotter!'); // Alert error message
@@ -138,7 +140,7 @@ function deleteBlooter(id) {
         .then(response => {
             if (response.ok) {
                 alert('Blotter deleted successfully!'); // Alert success message
-                    location.reload(); // Reload the page after deletion
+                location.reload(); // Reload the page after deletion
             } else {
                 return response.json().then(data => {
                     alert(data.message || 'Error deleting blotter!'); // Alert error message
@@ -152,4 +154,3 @@ function deleteBlooter(id) {
     }
 }
 </script>
-

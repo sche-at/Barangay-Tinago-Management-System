@@ -17,7 +17,7 @@
                         <thead>
                             <tr>
                                 <th>Event No.</th>
-                                <th>Type of Event</th>
+                                <th>Event Name</th>
                                 <th>Venue</th>
                                 <th>Task Assigned</th>
                                 <th>Date</th>
@@ -56,7 +56,7 @@
             <div class="modal-body">
                 <form id="eventForm">
                     <div class="mb-3">
-                        <label for="eventType" class="form-label">Event Type</label>
+                        <label for="eventType" class="form-label">Event Name</label>
                         <input type="text" class="form-control" id="eventType" name="event_type" required>
                     </div>
                     <div class="mb-3">

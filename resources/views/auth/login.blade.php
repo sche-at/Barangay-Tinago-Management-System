@@ -31,9 +31,32 @@
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
         }
+         /* Marquee styling */
+         .marquee-container { /* New Container for Marquee */
+            position: absolute;
+            top: 45%; /* Position it near the top */
+            width: 50%;
+            left: 25%;
+            right: 50%;
+            z-index: 2; /* Below the form but above the overlay */
+            text-align: center;
+        }
+
+        .marquee-text { /* Marquee text styling */
+    color: rgb(0, 0, 0);
+    font-size: 100px;
+    font-weight: bold;
+    opacity: 0.7; /* Adjust the value between 0 (fully transparent) and 1 (fully opaque) */
+}
+
     </style>
 
     <div class="overlay"></div> <!-- Overlay -->
+    <div class="marquee-container">
+        <marquee behavior="scroll" direction="left" scrollamount="10">
+            <span class="marquee-text">BARANGAY TINAGO MANAGEMENT SYSTEM</span>
+        </marquee>
+    </div>
 
     <div class="form-container">
         <!-- Session Status -->

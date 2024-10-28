@@ -107,10 +107,13 @@
                                 <label for="educationalLevel" class="form-label">Educational Level</label>
                                 <select name="educational_level" class="form-select" id="educationalLevel" required>
                                     <option value="">Select educational level</option>
-                                    <option value="highschool">High School</option>
-                                    <option value="bachelor">Bachelor's Degree</option>
-                                    <option value="master">Master's Degree</option>
-                                    <option value="phd">Ph.D.</option>
+                                    <option value="elementary_level">Elementary Level</option>
+                                    <option value="elementary_graduate">Elementary Graduate</option>
+                                    <option value="highschool_level">Highschool Levle</option>
+                                    <option value="highschool_graduate">Highschool Graduate</option>
+                                    <option value="college_level">College Level</option>
+                                    <option value="college_graduate">College Gradaute</option>
+                                    <option value="post_grad">Post Graduate</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -126,6 +129,8 @@
                                     <option value="employed">Employed</option>
                                     <option value="unemployed">Unemployed</option>
                                     <option value="self-employed">Self-employed</option>
+                                    <option value="part_time">Part Time</option>
+                                    <option value="full_time">Full Time</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -144,7 +149,38 @@
                                 </div>
                                 <div class="col">
                                     <label for="familyRelationship1" class="form-label">Family Relationship</label>
-                                    <input type="text" name="family_relationships[]" class="form-control" id="familyRelationship1" placeholder="Enter relationship" required>
+                                    <select name="family_relationships[]" class="form-control" id="familyRelationship1" required>
+                                        <option value="">Select Family Relationship</option>
+                                        <option value="father">Father</option>
+                                        <option value="mother">Mother</option>
+                                        <option value="son">Son</option>
+                                        <option value="daugther">Daugther</option>
+                                        <option value="brother">Brother</option>
+                                        <option value="sister">Sister</option>
+                                        <option value="grandmother">Grandmother</option>
+                                        <option value="grandfather">Grandfather</option>
+                                        <option value="grandson">Grandson</option>
+                                        <option value="granddaugther">Granddaugther</option>
+                                        <option value="aunt">Aunt</option>
+                                        <option value="uncle">Uncle</option>
+                                        <option value="nephew">Nephew</option>
+                                        <option value="niece">Niece</option>
+                                        <option value="cousin">Cousin</option>
+                                        <option value="husband">Husband</option>
+                                        <option value="wife">Wife</option>
+                                        <option value="father-in-law">Father-in-Law</option>
+                                        <option value="mother-in-law">Mother-in-Law</option>
+                                        <option value="son-in-law">Son-in-law</option>
+                                        <option value="daugther-in-law">Daugther-in-law</option>
+                                        <option value="brother-in-law">Brother-in-law</option>
+                                        <option value="sister-in-law">Sister-in-law</option>
+                                        <option value="stepfather">Stepfather</option>
+                                        <option value="Stepmother">Stepmother</option>
+                                        <option value="stepson">Stepson</option>
+                                        <option value="stepdaugther">Stepdaugther</option>
+                                        <option value="half-brother">Half-brother</option>
+                                        <option value="half-sister">Half-sister</option>
+                                     </select>
                                 </div>
                                 <div class="col">
                                     <label for="familyBirthdate1" class="form-label">Family Birthdate</label>
@@ -269,33 +305,65 @@ $('#saveResidentBtn').on('click', function() {
 
 
 
-    // Function to add family members dynamically
-    $('#addFamilyMember').on('click', function() {
-        const memberIndex = $('.family-member').length + 1;
-        $('#familyMembers').append(`
-            <div class="row mb-3 family-member">
-                <div class="col">
-                    <label for="familyMemberName${memberIndex}" class="form-label">Family Member Name</label>
-                    <input type="text" name="family_members[]" class="form-control" id="familyMemberName${memberIndex}" placeholder="Enter family member name" required>
-                </div>
-                <div class="col">
-                    <label for="familyRelationship${memberIndex}" class="form-label">Family Relationship</label>
-                    <input type="text" name="family_relationships[]" class="form-control" id="familyRelationship${memberIndex}" placeholder="Enter relationship" required>
-                </div>
-                <div class="col">
-                    <label for="familyBirthdate${memberIndex}" class="form-label">Family Birthdate</label>
-                    <input type="date" name="family_birthdates[]" class="form-control" id="familyBirthdate${memberIndex}" required>
-                </div>
-                <div class="col">
-                    <label for="familyBirthplace${memberIndex}" class="form-label">Family Birthplace</label>
-                    <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace${memberIndex}" placeholder="Enter birthplace" required>
-                </div>
-                <div class="col mt-4">
-                    <button type="button" class="btn btn-danger remove-member">Remove</button>
-                </div>
+   // Function to add family members dynamically
+$('#addFamilyMember').on('click', function() {
+    const memberIndex = $('.family-member').length + 1;
+    $('#familyMembers').append(`
+        <div class="row mb-3 family-member">
+            <div class="col">
+                <label for="familyMemberName${memberIndex}" class="form-label">Family Member Name</label>
+                <input type="text" name="family_members[]" class="form-control" id="familyMemberName${memberIndex}" placeholder="Enter family member name" required>
             </div>
-        `);
-    });
+            <div class="col">
+                <label for="familyRelationship${memberIndex}" class="form-label">Family Relationship</label>
+                <select name="family_relationships[]" class="form-control" id="familyRelationship${memberIndex}" required>
+                    <option value="">Select Family Relationship</option>
+                    <option value="father">Father</option>
+                    <option value="mother">Mother</option>
+                    <option value="son">Son</option>
+                    <option value="daughter">Daughter</option>
+                    <option value="brother">Brother</option>
+                    <option value="sister">Sister</option>
+                    <option value="grandmother">Grandmother</option>
+                    <option value="grandfather">Grandfather</option>
+                    <option value="grandson">Grandson</option>
+                    <option value="granddaughter">Granddaughter</option>
+                    <option value="aunt">Aunt</option>
+                    <option value="uncle">Uncle</option>
+                    <option value="nephew">Nephew</option>
+                    <option value="niece">Niece</option>
+                    <option value="cousin">Cousin</option>
+                    <option value="husband">Husband</option>
+                    <option value="wife">Wife</option>
+                    <option value="father-in-law">Father-in-Law</option>
+                    <option value="mother-in-law">Mother-in-Law</option>
+                    <option value="son-in-law">Son-in-law</option>
+                    <option value="daughter-in-law">Daughter-in-law</option>
+                    <option value="brother-in-law">Brother-in-law</option>
+                    <option value="sister-in-law">Sister-in-law</option>
+                    <option value="stepfather">Stepfather</option>
+                    <option value="stepmother">Stepmother</option>
+                    <option value="stepson">Stepson</option>
+                    <option value="stepdaughter">Stepdaughter</option>
+                    <option value="half-brother">Half-brother</option>
+                    <option value="half-sister">Half-sister</option>
+                </select>
+            </div>
+            <div class="col">
+                <label for="familyBirthdate${memberIndex}" class="form-label">Family Birthdate</label>
+                <input type="date" name="family_birthdates[]" class="form-control" id="familyBirthdate${memberIndex}" required>
+            </div>
+            <div class="col">
+                <label for="familyBirthplace${memberIndex}" class="form-label">Family Birthplace</label>
+                <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace${memberIndex}" placeholder="Enter birthplace" required>
+            </div>
+            <div class="col mt-4">
+                <button type="button" class="btn btn-danger remove-member">Remove</button>
+            </div>
+        </div>
+    `);
+});
+
 
     // Remove family member
     $(document).on('click', '.remove-member', function() {
