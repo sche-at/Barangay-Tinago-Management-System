@@ -34,7 +34,7 @@
                             </div>
                             <div class="col">
                                 <label for="age" class="form-label">Age</label>
-                                <input type="number" name="age" class="form-control" id="age" placeholder="Enter your age" min="0" required>
+                                <input type="number" name="age" class="form-control" id="age" placeholder="Enter your age" min="0" readonly required>
                             </div>
                         </div>
 
@@ -51,7 +51,16 @@
                             </div>
                             <div class="col">
                                 <label for="purok" class="form-label">Purok</label>
-                                <input type="number" name="purok" class="form-control" id="purok" placeholder="Enter Purok" required>
+                                 <select name="purok" class="form-control" id="purok" placeholder="Enter Purok" required>
+                                    <option value="">Select Purok</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                 </select>
                             </div>
                         </div>
 
@@ -98,9 +107,13 @@
                                 </select>
                             </div>
                             <div class="col">
-                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                <input type="tel" name="contact_number" class="form-control" id="contactNumber" placeholder="Enter contact number" required>
-                            </div>
+                            <label for="contactNumber" class="form-label">Contact Number</label>
+                            <input type="tel" name="contact_number" class="form-control" id="contactNumber" 
+                                   placeholder="Enter contact number" required 
+                                   pattern="^\d{11}$" 
+                                   title="Contact number must be exactly 11 digits" 
+                                   maxlength="11">
+                        </div>
                         </div>
 
                         <!-- Family Members Section -->
@@ -212,4 +225,27 @@
             event.target.closest('.family-member').remove();
         }
     });
+//for 11 digits
+    document.getElementById('contactNumber').addEventListener('input', function (e) {
+        const value = e.target.value;
+        // Limit input to numbers only
+        e.target.value = value.replace(/[^0-9]/g, '').slice(0, 11);
+    });
+
+    // for automatic na mo edad
+
+    document.getElementById('dob').addEventListener('change', function () {
+        const dob = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDifference = today.getMonth() - dob.getMonth();
+        
+        // Adjust age if birthday hasn't occurred this year yet
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        document.getElementById('age').value = age;
+    });
+
 </script>

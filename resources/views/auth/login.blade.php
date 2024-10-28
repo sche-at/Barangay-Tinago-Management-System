@@ -46,7 +46,7 @@
     color: rgb(0, 0, 0);
     font-size: 100px;
     font-weight: bold;
-    opacity: 0.7; /* Adjust the value between 0 (fully transparent) and 1 (fully opaque) */
+    opacity: 0.6; /* Adjust the value between 0 (fully transparent) and 1 (fully opaque) */
 }
 
     </style>
