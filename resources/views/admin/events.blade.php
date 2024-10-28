@@ -65,7 +65,16 @@
                     </div>
                     <div class="mb-3">
                         <label for="taskAssigned" class="form-label">Task Assigned</label>
-                        <input type="text" class="form-control" id="taskAssigned" name="task_assigned" required>
+                        <select name="task_assigned"  type="text" class="form-control" id="taskAssigned" required>
+                            <option value="">Select Kagawad</option>
+                                    <option value="Kagawad 1">Kagawad 1</option>
+                                    <option value="Kagawad 2">Kagawad 2</option>
+                                    <option value="Kagawad 3">Kagawad 3</option>
+                                    <option value="Kagawad 4">Kagawad 4</option>
+                                    <option value="Kagawad 5">Kagawad 5</option>
+                                    <option value="Kagawad 6">Kagawad 6</option>
+                                    <option value="Kagawad 7">Kagawad 7</option>
+                        </select>
                     </div>
                 </form>
             </div>

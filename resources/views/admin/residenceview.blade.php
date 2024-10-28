@@ -73,7 +73,7 @@
                             </div>
                             <div class="col">
                                 <label for="age" class="form-label">Age</label>
-                                <input type="number" name="age" class="form-control" id="age" placeholder="Enter your age" min="0" required>
+                                <input type="number" name="age" class="form-control" id="age" placeholder="Enter your age" min="0" readonly required>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -135,7 +135,11 @@
                             </div>
                             <div class="col">
                                 <label for="contactNumber" class="form-label">Contact Number</label>
-                                <input type="tel" name="contact_number" class="form-control" id="contactNumber" placeholder="Enter contact number" required>
+                                <input type="tel" name="contact_number" class="form-control" id="contactNumber" 
+                                       placeholder="Enter contact number" required 
+                                       pattern="^\d{11}$" 
+                                       title="Contact number must be exactly 11 digits" 
+                                       maxlength="11">
                             </div>
                         </div>
 
@@ -369,4 +373,28 @@ $('#addFamilyMember').on('click', function() {
     $(document).on('click', '.remove-member', function() {
         $(this).closest('.family-member').remove();
     });
+
+    //for 11 digits
+    document.getElementById('contactNumber').addEventListener('input', function (e) {
+        const value = e.target.value;
+        // Limit input to numbers only
+        e.target.value = value.replace(/[^0-9]/g, '').slice(0, 11);
+    });
+
+    //for automatic na mo edad
+
+    document.getElementById('dob').addEventListener('change', function () {
+        const dob = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDifference = today.getMonth() - dob.getMonth();
+        
+        // Adjust age if birthday hasn't occurred this year yet
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        document.getElementById('age').value = age;
+    });
+
 </script>
