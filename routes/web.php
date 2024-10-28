@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/history', [TransactionsController::class, 'history'])->name('transactions.history');
     Route::post('/transactions/store', [TransactionsController::class, 'store'])->name('transactions.store');
     Route::get('/report', [TransactionsController::class, 'report'])->name('transactions.report');
+    Route::get('/export/{id}',[TransactionsController::class, 'export'])->name('transactions.exporttransactions');
 
 });
 

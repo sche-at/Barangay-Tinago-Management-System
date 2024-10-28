@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transactions;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -41,10 +43,16 @@ class TransactionsController extends Controller
         $user = Auth::user();
 
         if($user->user_type == 'treasurer' || $user->user_type == 'captain'){
-            return view('admin.report');
+            $transactions = Transactions::with('user')->get();
+            return view('admin.report', compact('transactions'));
         } else {
             return redirect(route('dashboard'));
         }
+    }
+
+    public function export()
+    {
+
     }
 
     /**

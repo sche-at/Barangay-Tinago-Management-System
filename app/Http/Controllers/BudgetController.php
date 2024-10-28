@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Models\BudgetsDetails;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -22,7 +23,8 @@ class BudgetController extends Controller
 
         if($user->user_type == 'captain' || $user->user_type == 'treasurer'){
             $budgets =  Budget::all();
-            return view('admin.budgetplan', compact('budgets'));
+            $budgetDetails = BudgetsDetails::all();
+            return view('admin.budgetplan', compact('budgets', 'budgetDetails'));
         }else{
             return redirect(route('dashboard'));
         }
