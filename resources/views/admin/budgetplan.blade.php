@@ -130,7 +130,7 @@ document.getElementById('savePlanningBtn').addEventListener('click', function() 
     .then(response => {
         if (response.ok) {
             $('#PlaningModal').modal('hide');
-            alert(response); // Alert success message
+            alert('Budget Plan Heading deleted successfully!'); // Alert success message
             location.reload(); // Reload the page after saving
         } else {
             return response.json().then(data => {

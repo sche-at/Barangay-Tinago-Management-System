@@ -69,32 +69,40 @@ class TransactionsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'request_type' => 'required|string',
+            'request_type' => 'required|array',
+            'request_type.*' => 'required|string',
             'purok' => 'required|string',
-            'purpose' => 'required|string',
+            'purpose' => 'required|array',
+            'purpose.*' => 'required|string',
+            'mode_payment' => 'required|string',
         ]);
 
         $user = Auth::user();
+        $filePath = null;
 
-        $transactions = new Transactions();
-        $transactions->user_id = $user->id;
-        $transactions->trans_type = $request->request_type;
-        $transactions->purpose = $request->purok;
-        $transactions->purok = $request->purpose;
-        $transactions->mode_payment = $request->mode_payment;
-
-        if ($request->hasFile('gcash_file')) {
-            // Store the file in the 'uploads/gcash_files' directory
+        // Check if a file is uploaded for GCash payment and store it
+        if ($request->mode_payment === 'GCash' && $request->hasFile('gcash_file')) {
             $filePath = $request->file('gcash_file')->store('assets/uploads', 'public');
-            
-            // Save the file path in the database
-            $transactions->file_path = $filePath;
         }
 
-        $transactions->save();
+        // Loop through each request type and purpose to create separate transaction entries
+        foreach ($request->request_type as $index => $type) {
+            $transactions = new Transactions();
+            $transactions->user_id = $user->id;
+            $transactions->trans_type = $type;
+            $transactions->purok = $request->purok;
+            $transactions->purpose = $request->purpose[$index];
+            $transactions->mode_payment = $request->mode_payment;
 
-        return redirect()->back()->with('success', 'Your request of ' . $request->request_type . ' successfully submitted.');
-        
+            // Assign file path if available
+            if ($filePath) {
+                $transactions->file_path = $filePath;
+            }
+
+            $transactions->save();
+        }
+
+        return redirect()->back()->with('success', 'Your requests have been successfully submitted.');
     }
 
     /**
