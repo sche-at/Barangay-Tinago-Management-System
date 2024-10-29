@@ -79,6 +79,7 @@ class TransactionsController extends Controller
 
         $user = Auth::user();
         $filePath = null;
+        $errors = [];
 
         // Check if a file is uploaded for GCash payment and store it
         if ($request->mode_payment === 'GCash' && $request->hasFile('gcash_file')) {
@@ -87,6 +88,18 @@ class TransactionsController extends Controller
 
         // Loop through each request type and purpose to create separate transaction entries
         foreach ($request->request_type as $index => $type) {
+            // Check for existing requests of this type by the user on the current date
+            $requestCountToday = Transactions::where('user_id', $user->id)
+                ->where('trans_type', $type)
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+
+            if ($requestCountToday >= 2) {
+                $errors[] = "You have already submitted two requests for {$type} today.";
+                continue; // Skip saving this request type if limit reached
+            }
+
+            // Save the request if the limit is not reached
             $transactions = new Transactions();
             $transactions->user_id = $user->id;
             $transactions->trans_type = $type;
@@ -100,6 +113,11 @@ class TransactionsController extends Controller
             }
 
             $transactions->save();
+        }
+
+        // If there are errors, redirect back with errors
+        if (!empty($errors)) {
+            return redirect()->back()->withErrors($errors)->withInput();
         }
 
         return redirect()->back()->with('success', 'Your requests have been successfully submitted.');
