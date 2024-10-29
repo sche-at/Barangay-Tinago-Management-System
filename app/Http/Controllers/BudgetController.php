@@ -161,6 +161,23 @@ class BudgetController extends Controller
             // Update the main counter to continue after the last detail in the current section
             $budgetDetailsCounter = $budgetDetailsValCounter + 1;
         }
+
+        // After populating all sections and details, set the final total row
+        $totalRow = $budgetDetailsCounter; // Set the final row number after all sections
+
+        // Merge cells for the Total label
+        $sheet->mergeCells("A{$totalRow}:H{$totalRow}");
+        $sheet->setCellValue("A{$totalRow}", 'Grand Total');
+        $sheet->getStyle("A{$totalRow}:H{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("A{$totalRow}:H{$totalRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // Set the formula to sum up all amounts in the I column
+        $sheet->setCellValue("I{$totalRow}", "=SUM(I4:I" . ($totalRow - 1) . ")"); // Adjust range as needed
+        $sheet->getStyle("I{$totalRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("I{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Apply bold style to the Grand Total row
+        $sheet->getStyle("A{$totalRow}:I{$totalRow}")->getFont()->setBold(true);
         // // Set other cells as needed
         // $sheet->mergeCells('A3:H3');
         // $sheet->setCellValue('A3', 'Estimated Income');
