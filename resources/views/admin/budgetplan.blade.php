@@ -29,8 +29,8 @@
                                     <td>{{ $row->created_at->format('F j, Y') }}</td> <!-- For the full month name and year -->
                                     <td>{{ $row->created_at->format('h:i A') }}</td> <!-- For time with AM/PM -->
                                     <td>
-                                        <a href="{{ route('budget.exportbudget', ['id' => $row->id]) }}" class="btn btn-success btn-sm">Proceed</a>
-                                        <button class="btn btn-danger btn-sm" onclick="deletePlanning({{ $row->id }})">Delete</button>
+                                        <a href="{{ route('budget.exportbudget', ['id' => $row->id]) }}" class="btn btn-success btn-sm">Print</a>
+                                        {{-- <button class="btn btn-danger btn-sm" onclick="deletePlanning({{ $row->id }})">Delete</button> --}}
                                     </td>
                                 </tr>
                             @endforeach
@@ -95,6 +95,14 @@
 </div>
 
 <script>
+
+$('#PlaningModal').on('show.bs.modal', function() {
+    // Select all tbody elements within the modal and clear their contents
+    $(this).find('tbody').each(function() {
+        $(this).empty(); // Clear all rows
+    });
+});
+
 document.getElementById('savePlanningBtn').addEventListener('click', function() {
     const data = {
         title_plan: document.getElementById('titlePlan').value, // Match title_plan
@@ -157,10 +165,10 @@ function addInputRow(button, id) {
     const newRow = document.createElement('tr'); // Create a new row
     newRow.innerHTML = `
         <td>
-            <input type="hidden" name="trans_id" value="${id}">
-            <input type="text" class="form-control" placeholder="Transaction Details" required>
+            <input type="hidden" name="trans_id[]" value="${id}">
+            <input type="text" name="trans_details[]" class="form-control" placeholder="Transaction Details" required>
         </td>
-        <td><input type="number" class="form-control" placeholder="Amount" required></td>
+        <td><input type="number" name="trans_amt[]" class="form-control" placeholder="Amount" required></td>
         <td>
             <button type="button" class="btn btn-danger" onclick="removeInputRow(this)">
                 <i class="fas fa-trash"></i>
