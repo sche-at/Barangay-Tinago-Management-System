@@ -104,8 +104,19 @@ $('#PlaningModal').on('show.bs.modal', function() {
 });
 
 document.getElementById('savePlanningBtn').addEventListener('click', function() {
+    const titlePlan = document.getElementById('titlePlan').value;
+
+    // Collect all trans_id, trans_details, and trans_amt values
+    const transIds = Array.from(document.querySelectorAll('input[name="trans_id[]"]')).map(input => input.value);
+    const transDetails = Array.from(document.querySelectorAll('input[name="trans_details[]"]')).map(input => input.value);
+    const transAmounts = Array.from(document.querySelectorAll('input[name="trans_amt[]"]')).map(input => input.value);
+
+    // Build the data object to send
     const data = {
-        title_plan: document.getElementById('titlePlan').value, // Match title_plan
+        title_plan: titlePlan,
+        trans_id: transIds,
+        trans_details: transDetails,
+        trans_amt: transAmounts,
     };
 
     fetch('/insertplanning', {
@@ -119,7 +130,7 @@ document.getElementById('savePlanningBtn').addEventListener('click', function() 
     .then(response => {
         if (response.ok) {
             $('#PlaningModal').modal('hide');
-            alert('Budget plan heading saved successfully!'); // Alert success message
+            alert(response); // Alert success message
             location.reload(); // Reload the page after saving
         } else {
             return response.json().then(data => {
