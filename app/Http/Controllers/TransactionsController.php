@@ -50,10 +50,32 @@ class TransactionsController extends Controller
         }
     }
 
-    public function export()
-    {
+    public function export($id)
+{
+    $transaction = Transactions::with('user')->findOrFail($id);
 
-    }
+    $templatePath = public_path('templates/example.docx');
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+
+    // Replace placeholders with transaction data
+    $templateProcessor->setValue('name', $transaction->user->name);
+    $templateProcessor->setValue('purok', $transaction->purok);
+    $templateProcessor->setValue('purpose', $transaction->purpose);
+    $templateProcessor->setValue('title', $transaction->trans_type);
+    $templateProcessor->setValue('day', $transaction->created_at->format('j'));
+    $templateProcessor->setValue('month', $transaction->created_at->format('F'));
+    $templateProcessor->setValue('year', $transaction->created_at->format('Y'));
+
+    // Save the modified file to a temporary path
+    $fileName = 'transaction_' . $transaction->id . '.docx';
+    $tempPath = storage_path('app/public/' . $fileName);
+    $templateProcessor->saveAs($tempPath);
+
+    // Download the file and delete it after sending
+    return response()->download($tempPath)->deleteFileAfterSend(true);
+}
+
+    
 
     /**
      * Show the form for creating a new resource.
@@ -154,4 +176,27 @@ class TransactionsController extends Controller
     {
         //
     }
+
+    public function updateStatus($id)
+{
+    $transaction = Transactions::findOrFail($id);
+
+    // Define the status order for toggling
+    $statuses = ['Not Ready', 'Processing', 'Ready for Pickup'];
+    $currentStatusIndex = array_search($transaction->status, $statuses);
+    $nextStatusIndex = ($currentStatusIndex + 1) % count($statuses);
+    $transaction->status = $statuses[$nextStatusIndex];
+
+    $transaction->save();
+
+    return redirect()->back()->with('status', 'Transaction status updated successfully!');
+}
+public function clearHistory()
+{
+    Transactions::truncate(); // This will delete all records in the transactions table.
+    return redirect()->back()->with('success', 'Transaction history cleared successfully.');
+}
+
+
+
 }

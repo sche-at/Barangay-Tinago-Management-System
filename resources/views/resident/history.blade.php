@@ -44,6 +44,22 @@
     .transaction-receipt a:hover {
         text-decoration: underline;
     }
+
+    .clear-history-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 1rem;
+        color: #fff;
+        background-color: #dc3545; /* Bootstrap danger color */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .clear-history-button:hover {
+        background-color: #c82333; /* Darker shade for hover */
+    }
 </style>
 
 <div id="layoutSidenav_content">
@@ -51,8 +67,13 @@
         <div class="container-fluid px-4">
             <div class="announcement-title">Transaction History</div>
 
+            <form action="{{ route('transactions.clear') }}" method="POST" onsubmit="return confirm('Are you sure you want to clear all history?');">
+                @csrf
+                <button type="submit" class="clear-history-button">Clear All History</button>
+            </form>
+
             <ul class="transaction-list">
-                @foreach($transactions as $transaction)
+                @foreach($transactions->sortByDesc('created_at') as $transaction) <!-- Sort transactions here -->
                 <li class="transaction-item">
                     <div>
                         <span class="transaction-label">Date: </span>
@@ -73,6 +94,14 @@
                     <div>
                         <span class="transaction-label">Payment Mode: </span>
                         <span class="transaction-value">{{ $transaction->mode_payment }}</span>
+                    </div>
+                    <div>
+                        <span class="transaction-label">Status: </span>
+                        <span class="transaction-value badge 
+                            {{ $transaction->status == 'Not Ready' ? 'bg-danger' : 
+                               ($transaction->status == 'Processing' ? 'bg-warning' : 'bg-success') }} text-white">
+                            {{ $transaction->status }}
+                        </span>
                     </div>
                     <div class="transaction-receipt">
                         <span class="transaction-label">Receipt: </span>

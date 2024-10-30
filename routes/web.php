@@ -82,6 +82,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/transactions/store', [TransactionsController::class, 'store'])->name('transactions.store');
     Route::get('/report', [TransactionsController::class, 'report'])->name('transactions.report');
     Route::get('/export/{id}',[TransactionsController::class, 'export'])->name('transactions.exporttransactions');
+    Route::patch('/transactions/{id}/status', [TransactionsController::class, 'updateStatus'])->name('transactions.updateStatus');
+    Route::post('/transactions/clear', [TransactionsController::class, 'clearHistory'])->name('transactions.clear');
+    Route::get('/transactions/{id}/print', [TransactionsController::class, 'print'])->name('transactions.print');
+    Route::get('/transactions/export/{id}', [TransactionsController::class, 'export'])->name('transactions.export');
+
+
 
 });
 

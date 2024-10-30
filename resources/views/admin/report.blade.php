@@ -15,6 +15,7 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>Status</th> <!-- New Status Column -->
                                 <th>Purok</th>
                                 <th>Purpose</th>
                                 <th>Payment</th>
@@ -29,28 +30,35 @@
                             @foreach($transactions as $row)
                                 <tr>
                                     <td>{{ $row->user->name }}</td>
-                                    <td>{{ $row->purpose }}</td>
+                                    <td>
+                                        <form action="{{ route('transactions.updateStatus', $row->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm
+                                                {{ $row->status == 'Not Ready' ? 'btn-danger' : ($row->status == 'Processing' ? 'btn-warning' : 'btn-success') }}">
+                                                {{ $row->status }}
+                                            </button>
+                                        </form>
+                                    </td>
                                     <td>{{ $row->purok }}</td>
+                                    <td>{{ $row->purpose }}</td>
                                     <td>{{ $row->mode_payment }}</td>
                                     <td>
                                         @if($row->file_path)
-                                        <a href="{{ asset('storage/'.$row->file_path) }}" target="_blank">View Receipt</a>
+                                            <a href="{{ asset('storage/'.$row->file_path) }}" target="_blank">View Receipt</a>
                                         @else
-                                        <span class="transaction-value">N/A</span>
+                                            <span class="transaction-value">N/A</span>
                                         @endif
                                     </td>
+                                    <td><span class="badge bg-primary">{{ $row->trans_type }}</span></td>
+                                    <td>{{ $row->created_at->format('F j, Y') }}</td>
+                                    <td>{{ $row->created_at->format('h:i A') }}</td>
                                     <td>
-                                        <span class="badge bg-primary">
-                                            {{ $row->trans_type }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $row->created_at->format('F j, Y') }}</td> <!-- For the full month name and year -->
-                                    <td>{{ $row->created_at->format('h:i A') }}</td> <!-- For time with AM/PM -->
-                                    <td>
-                                        <a href="{{ route('transactions.exporttransactions', ['id' => $row->id]) }}" class="btn btn-success btn-sm">Print</a>
+                                        <a href="{{ route('transactions.export', ['id' => $row->id]) }}" class="btn btn-success btn-sm">Download</a>
+
                                     </td>
                                 </tr>
-                             @endforeach
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

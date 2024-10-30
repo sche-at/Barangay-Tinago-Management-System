@@ -163,6 +163,7 @@
                                     <label for="familyBirthdate1" class="form-label">Family Birthdate</label>
                                     <input type="date" name="family_birthdates[]" class="form-control" id="familyBirthdate1" required>
                                 </div>
+                                
                                 <div class="col">
                                     <label for="familyBirthplace1" class="form-label">Family Birthplace</label>
                                     <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace1" placeholder="Enter birthplace" required>
