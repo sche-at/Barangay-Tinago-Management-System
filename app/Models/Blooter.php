@@ -4,25 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Blooter extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    // Specify the table name if it's different from the default
-    protected $table = 'blooters'; // Optional if the table name is the plural form of the model name
-
-    // Specify the fillable properties for mass assignment
+    protected $table = 'blooters';
     protected $fillable = [
         'blotters_name',
         'incident_type',
         'location',
         'reported_by',
         'description',
+        'incident_date',
+        'incident_time'
     ];
 
-    // Optionally, you can define any relationships if needed
-    // public function user() {
-    //     return $this->belongsTo(User::class);
-    // }
+    protected $dates = [
+        'incident_date',
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    protected $casts = [
+        'incident_date' => 'date',
+        'incident_time' => 'datetime:H:i'
+    ];
 }

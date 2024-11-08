@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prenatal;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PrenatalController extends Controller
 {
@@ -38,18 +40,25 @@ class PrenatalController extends Controller
      */
     public function store(Request $request)
     {
+        try{
         $request->validate([
-            'activity' => 'required|string|max:255',
-            'venue' => 'required|string|max:255',
+            'activity' => 'required|string',
+            'venue' => 'required|string',
+            'schedule_date' => 'required|date',
+            'schedule_time' => 'required'
         ]);
-
-        // Create a new Blotter entry
-        $prenatal = new Prenatal();
-        $prenatal->activity = $request->activity;
-        $prenatal->venue = $request->venue;
-        $prenatal->save();
-
-        return response()->json(['message' => 'Immunization saved successfully!']); // Return success message
+     
+        $prenatal = Prenatal::create([
+            'activity' => $request->activity,
+            'venue' => $request->venue,
+            'schedule_date' => $request->schedule_date,
+            'schedule_time' => $request->schedule_time
+        ]);
+    
+        return response()->json(['message' => 'Prenatal saved successfully!']);
+    }catch(Exception $exception){
+        Log::info('erro message', [$exception]);
+    }
     }
 
     /**

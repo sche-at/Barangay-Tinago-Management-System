@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Budget extends Model
 {
-    use HasFactory;
+    protected $table = 'budgets_header';
     
-    protected $fillable = [
-        'budget_header'
-    ];
+    protected $fillable = ['title_plan'];
+
+    public function budgetDetailsValues()
+    {
+        return $this->hasMany(BudgetDetailsValue::class, 'budget_header_id');
+    }
 }

@@ -12,22 +12,43 @@
                     <form method="POST" action="{{ route('residence.store') }}">
                         @csrf
                         <div class="row mb-3">
-                            <div class="col">
-                                <label for="fullName" class="form-label">Full Name</label>
-                                <input type="text" name="full_name" class="form-control" id="fullName" placeholder="Enter your full name" required>
+                            <div class="col-md-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" name="first_name" class="form-control" id="firstName" placeholder="Enter first name" required>
                             </div>
-                            <div class="col">
-                                <label for="sex" class="form-label">Sex</label>
-                                <select name="sex" class="form-select" id="sex" required>
-                                    <option value="">Select your sex</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
+                            <div class="col-md-3">
+                                <label for="middleName" class="form-label">Middle Name (if applicable) </label>
+                                <input type="text" name="middle_name" class="form-control" id="middleName" placeholder="Enter middle name">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" id="lastName" placeholder="Enter last name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="suffix" class="form-label">Suffix</label>
+                                <select name="suffix" class="form-select" id="suffix">
+                                    <option disabled selected value="">select suffix (if applicale) </option>
+                                    <option value="N/A">N/A</option>
+                                    <option value="Jr.">Jr.</option>
+                                    <option value="Sr.">Sr.</option>
+                                    <option value="II">II (The Second)</option>
+                                    <option value="III">III (The Third)</option>
                                 </select>
                             </div>
                         </div>
+                        
 
+                       
                         <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="sex" class="form-label">Sex</label>
+                                <select name="sex" class="form-select" id="sex" required>
+                                    <option disabled selected value=""> Select your sex</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Prefer not to say</option>
+                                </select>
+                            </div>
                             <div class="col">
                                 <label for="dob" class="form-label">Date of Birth</label>
                                 <input type="date" name="date_of_birth" class="form-control" id="dob" required>
@@ -36,13 +57,14 @@
                                 <label for="age" class="form-label">Age</label>
                                 <input type="number" name="age" class="form-control" id="age" placeholder="Enter your age" min="0" readonly required>
                             </div>
+                            
                         </div>
 
                         <div class="row mb-3">
                             <div class="col">
                                 <label for="civilStatus" class="form-label">Civil Status</label>
                                 <select name="civil_status" class="form-select" id="civilStatus" required>
-                                    <option value="">Select civil status</option>
+                                    <option disabled selected value="">Select civil status</option>
                                     <option value="single">Single</option>
                                     <option value="married">Married</option>
                                     <option value="divorced">Divorced</option>
@@ -52,7 +74,7 @@
                             <div class="col">
                                 <label for="purok" class="form-label">Purok</label>
                                  <select name="purok" class="form-control" id="purok" placeholder="Enter Purok" required>
-                                    <option value="">Select Purok</option>
+                                    <option disabled selected value="">Select Purok</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -79,6 +101,7 @@
                             <div class="col">
                                 <label for="educationalLevel" class="form-label">Educational Level</label>
                                 <select name="educational_level" class="form-select" id="educationalLevel" required>
+                                    <option disabled selected value="">Choose Educational Level</option>
                                     <option value="elementary_level">Elementary Level</option>
                                     <option value="elementary_graduate">Elementary Graduate</option>
                                     <option value="highschool_level">Highschool Levle</option>
@@ -86,6 +109,7 @@
                                     <option value="college_level">College Level</option>
                                     <option value="college_graduate">College Gradaute</option>
                                     <option value="post_grad">Post Graduate</option>
+                                    <option value="n/a">N/A</option>
                                 </select>
                             </div>
                             <div class="col">
@@ -98,7 +122,7 @@
                             <div class="col">
                                 <label for="employmentStatus" class="form-label">Employment Status</label>
                                 <select name="employment_status" class="form-select" id="employmentStatus" required>
-                                    <option value="">Select employment status</option>
+                                    <option disabled selected value="">Select employment status</option>
                                     <option value="employed">Employed</option>
                                     <option value="unemployed">Unemployed</option>
                                     <option value="self-employed">Self-employed</option>
@@ -119,15 +143,36 @@
                         <!-- Family Members Section -->
                         <div id="familyMembers">
                             <h5>Family Members</h5>
-                            <div class="row mb-3 family-member">
-                                <div class="col">
-                                    <label for="familyMemberName1" class="form-label">Family Member Name</label>
-                                    <input type="text" name="family_members[]" class="form-control" id="familyMemberName1" placeholder="Enter family member name" required>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="familyFirstName1" class="form-label">First Name</label>
+                                    <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName1" placeholder="First name" required>
                                 </div>
+                                <div class="col-md-3">
+                                    <label for="familyMiddleName1" class="form-label">Middle Name (if applicable)</label>
+                                    <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName1" placeholder="Middle name">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="familyLastName1" class="form-label">Last Name</label>
+                                    <input type="text" name="family_last_names[]" class="form-control" id="familyLastName1" placeholder="Last name" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="familySuffix1" class="form-label">Suffix</label>
+                                    <select name="family_suffixes[]" class="form-select" id="familySuffix1">
+                                        <option disabled selected value="">select suffix (if applicable)</option>
+                                        <option value="N/A">N/A</option>
+                                        <option value="Jr.">Jr.</option>
+                                        <option value="Sr.">Sr.</option>
+                                        <option value="II">II (The Second)</option>
+                                        <option value="III">III (The Third)</option>
+                                    </select>
+                                </div>
+                           
+
                                 <div class="col">
                                     <label for="familyRelationship1" class="form-label">Family Relationship</label>
                                     <select name="family_relationships[]" class="form-control" id="familyRelationship1" required>
-                                        <option value="">Select Family Relationship</option>
+                                        <option disabled selected value="">Select Family Relationship</option>
                                         <option value="father">Father</option>
                                         <option value="mother">Mother</option>
                                         <option value="son">Son</option>
@@ -159,9 +204,13 @@
                                         <option value="half-sister">Half-sister</option>
                                      </select>
                                 </div>
-                                <div class="col">
-                                    <label for="familyBirthdate1" class="form-label">Family Birthdate</label>
-                                    <input type="date" name="family_birthdates[]" class="form-control" id="familyBirthdate1" required>
+                                <div class="col-md-2">
+                                    <label for="familyBirthdate1" class="form-label">Birthdate</label>
+                                    <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate1" required>
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="familyAge1" class="form-label">Age</label>
+                                    <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge1" readonly required>
                                 </div>
                                 
                                 <div class="col">
@@ -187,25 +236,97 @@
 
     @include('templates.footer')
 </div>
-
 <script>
+    // Function to calculate age
+    function calculateAge(birthDate, ageField) {
+        const dob = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDifference = today.getMonth() - dob.getMonth();
+        
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        ageField.value = age;
+    }
+
+    // Main DOB listener
+    document.getElementById('dob').addEventListener('change', function() {
+        calculateAge(this.value, document.getElementById('age'));
+    });
+
+    // Add Family Member
     document.getElementById('addFamilyMember').addEventListener('click', function () {
         const familyMembersDiv = document.getElementById('familyMembers');
-        const memberCount = familyMembersDiv.querySelectorAll('.family-member').length + 1;
+        const memberCount = familyMembersDiv.querySelectorAll('.row').length + 1;
 
         const newMemberHTML = `
-            <div class="row mb-3 family-member">
-                <div class="col">
-                    <label for="familyMemberName${memberCount}" class="form-label">Family Member Name</label>
-                    <input type="text" name="family_members[]" class="form-control" id="familyMemberName${memberCount}" placeholder="Enter family member name" required>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label for="familyFirstName${memberCount}" class="form-label">First Name</label>
+                    <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName${memberCount}" placeholder="First name" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="familyMiddleName${memberCount}" class="form-label">Middle Name</label>
+                    <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName${memberCount}" placeholder="Middle name">
+                </div>
+                <div class="col-md-3">
+                    <label for="familyLastName${memberCount}" class="form-label">Last Name</label>
+                    <input type="text" name="family_last_names[]" class="form-control" id="familyLastName${memberCount}" placeholder="Last name" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="familySuffix${memberCount}" class="form-label">Suffix</label>
+                    <select name="family_suffixes[]" class="form-select" id="familySuffix${memberCount}">
+                        <option value="N/A">N/A</option>
+                        <option value="Jr.">Jr.</option>
+                        <option value="Sr.">Sr.</option>
+                        <option value="II">II (The Second)</option>
+                        <option value="III">III (The Third)</option>
+                    </select>
                 </div>
                 <div class="col">
                     <label for="familyRelationship${memberCount}" class="form-label">Family Relationship</label>
-                    <input type="text" name="family_relationships[]" class="form-control" id="familyRelationship${memberCount}" placeholder="Enter relationship" required>
+                    <select name="family_relationships[]" class="form-select" id="familyRelationship${memberCount}" required>
+                        <option value="">Select Family Relationship</option>
+                        <option value="father">Father</option>
+                        <option value="mother">Mother</option>
+                        <option value="son">Son</option>
+                        <option value="daugther">Daugther</option>
+                        <option value="brother">Brother</option>
+                        <option value="sister">Sister</option>
+                        <option value="grandmother">Grandmother</option>
+                        <option value="grandfather">Grandfather</option>
+                        <option value="grandson">Grandson</option>
+                        <option value="granddaugther">Granddaugther</option>
+                        <option value="aunt">Aunt</option>
+                        <option value="uncle">Uncle</option>
+                        <option value="nephew">Nephew</option>
+                        <option value="niece">Niece</option>
+                        <option value="cousin">Cousin</option>
+                        <option value="husband">Husband</option>
+                        <option value="wife">Wife</option>
+                        <option value="father-in-law">Father-in-Law</option>
+                        <option value="mother-in-law">Mother-in-Law</option>
+                        <option value="son-in-law">Son-in-law</option>
+                        <option value="daugther-in-law">Daugther-in-law</option>
+                        <option value="brother-in-law">Brother-in-law</option>
+                        <option value="sister-in-law">Sister-in-law</option>
+                        <option value="stepfather">Stepfather</option>
+                        <option value="Stepmother">Stepmother</option>
+                        <option value="stepson">Stepson</option>
+                        <option value="stepdaugther">Stepdaugther</option>
+                        <option value="half-brother">Half-brother</option>
+                        <option value="half-sister">Half-sister</option>
+                    </select>
                 </div>
-                <div class="col">
-                    <label for="familyBirthdate${memberCount}" class="form-label">Family Birthdate</label>
-                    <input type="date" name="family_birthdates[]" class="form-control" id="familyBirthdate${memberCount}" required>
+                <div class="col-md-2">
+                    <label for="familyBirthdate${memberCount}" class="form-label">Birthdate</label>
+                    <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate${memberCount}" required>
+                </div>
+                <div class="col-md-1">
+                    <label for="familyAge${memberCount}" class="form-label">Age</label>
+                    <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge${memberCount}" readonly required>
                 </div>
                 <div class="col">
                     <label for="familyBirthplace${memberCount}" class="form-label">Family Birthplace</label>
@@ -218,35 +339,53 @@
         `;
 
         familyMembersDiv.insertAdjacentHTML('beforeend', newMemberHTML);
+
+        // Add event listener to the new birthdate field
+        const newBirthdateField = document.getElementById(`familyBirthdate${memberCount}`);
+        const newAgeField = document.getElementById(`familyAge${memberCount}`);
+        newBirthdateField.addEventListener('change', function() {
+            calculateAge(this.value, newAgeField);
+        });
     });
 
     // Event delegation for removing family member fields
-    document.getElementById('familyMembers').addEventListener('click', function (event) {
+    document.getElementById('familyMembers').addEventListener('click', function(event) {
         if (event.target.classList.contains('remove-member')) {
-            event.target.closest('.family-member').remove();
+            event.target.closest('.row').remove();
         }
     });
-//for 11 digits
-    document.getElementById('contactNumber').addEventListener('input', function (e) {
-        const value = e.target.value;
-        // Limit input to numbers only
-        e.target.value = value.replace(/[^0-9]/g, '').slice(0, 11);
-    });
 
-    // for automatic na mo edad
+    // Initial family member birthdate listener
+    const initialBirthdate = document.getElementById('familyBirthdate1');
+    if (initialBirthdate) {
+        initialBirthdate.addEventListener('change', function() {
+            calculateAge(this.value, document.getElementById('familyAge1'));
+        });
+    }
 
-    document.getElementById('dob').addEventListener('change', function () {
-        const dob = new Date(this.value);
-        const today = new Date();
-        let age = today.getFullYear() - dob.getFullYear();
-        const monthDifference = today.getMonth() - dob.getMonth();
-        
-        // Adjust age if birthday hasn't occurred this year yet
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
-            age--;
-        }
+    // Contact number validation
+    const contactNumber = document.getElementById('contactNumber');
+    if (contactNumber) {
+        contactNumber.addEventListener('input', function(e) {
+            const value = e.target.value;
+            e.target.value = value.replace(/[^0-9]/g, '').slice(0, 11);
+        });
+    }
 
-        document.getElementById('age').value = age;
-    });
+    // Main DOB age calculation
+    const mainDob = document.getElementById('dob');
+    if (mainDob) {
+        mainDob.addEventListener('change', function() {
+            const dob = new Date(this.value);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDifference = today.getMonth() - dob.getMonth();
+            
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
 
+            document.getElementById('age').value = age;
+        });
+    }
 </script>

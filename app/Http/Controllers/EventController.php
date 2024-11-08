@@ -13,25 +13,65 @@ class EventController extends Controller
      */
     public function index()
     {
-
         $user = Auth::user();
 
         if($user->user_type == 'captain' || $user->user_type == 'event'){
-            $events = Event::all();
-            // Return the view with the blotters data
+            $events = Event::whereNull('deleted_at')->get(); // Only get active events
             return view('admin.events', compact('events'));
-            // return view('pages.events');
         }else{
             return redirect(route('dashboard'));
         }        
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display archived events.
      */
-    public function create()
+    public function archived()
     {
-        //
+        $user = Auth::user();
+
+        if($user->user_type == 'captain' || $user->user_type == 'event'){
+            $events = Event::onlyTrashed()->get();
+            return view('admin.archived_events', compact('events'));
+        }else{
+            return redirect(route('dashboard'));
+        }
+    }
+
+    /**
+     * Archive (soft delete) the specified event.
+     */
+    public function archive($id)
+    {
+        $user = Auth::user();
+        if($user->user_type != 'captain' && $user->user_type != 'event'){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $event = Event::findOrFail($id);
+        $event->status = 'archived';
+        $event->save();
+        $event->delete(); // This triggers soft delete
+
+        return response()->json(['message' => 'Event archived successfully!']);
+    }
+
+    /**
+     * Restore a soft-deleted event.
+     */
+    public function restore($id)
+    {
+        $user = Auth::user();
+        if($user->user_type != 'captain' && $user->user_type != 'event'){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $event = Event::withTrashed()->findOrFail($id);
+        $event->status = 'active';
+        $event->save();
+        $event->restore();
+
+        return response()->json(['message' => 'Event restored successfully!']);
     }
 
     /**
@@ -40,43 +80,23 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'event_type' => 'required|string|max:255',
-            'event_venue' => 'required|string|max:255',
-            'task_assigned' => 'required|string|max:255',
+            'event_type' => 'required|string',
+            'event_venue' => 'required|string',
+            'task_assigned' => 'required|string',
+            'event_date' => 'required|date',
+            'event_time' => 'required'
         ]);
-
-        // Create a new Blotter entry
-        $event = new Event();
-        $event->event_type = $request->event_type;
-        $event->event_venue = $request->event_venue;
-        $event->task_assigned = $request->task_assigned;
-        $event->save();
-
-        return response()->json(['message' => 'Event saved successfully!']); // Return success message
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Event $event)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Event $event)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Event $event)
-    {
-        //
+    
+        $event = Event::create([
+            'event_type' => $request->event_type,
+            'event_venue' => $request->event_venue,
+            'task_assigned' => $request->task_assigned,
+            'event_date' => $request->event_date,
+            'event_time' => $request->event_time,
+            'status' => 'active'
+        ]);
+    
+        return response()->json(['message' => 'Event saved successfully!']);
     }
 
     /**
@@ -84,9 +104,14 @@ class EventController extends Controller
      */
     public function destroy($id)
     {
-        $event = Event::findOrFail($id);
-        $event->delete();
+        $user = Auth::user();
+        if($user->user_type != 'captain' && $user->user_type != 'event'){
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
-        return response()->json(['message' => 'Event deleted successfully!'], 200);
+        $event = Event::withTrashed()->findOrFail($id);
+        $event->forceDelete(); // Permanently delete
+
+        return response()->json(['message' => 'Event permanently deleted successfully!'], 200);
     }
 }

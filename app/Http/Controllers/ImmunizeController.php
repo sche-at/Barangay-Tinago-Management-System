@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Immunize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ImmunizeController extends Controller
 {
@@ -14,73 +15,52 @@ class ImmunizeController extends Controller
     public function index()
     {
         $user = Auth::user();
-
-        if($user->user_type == 'captain' || $user->user_type == 'health'){
+    
+        if ($user->user_type == 'captain' || $user->user_type == 'health') {
             $immunizes = Immunize::all();
-        
-            // Return the view with the blotters data
             return view('admin.immunization', compact('immunizes'));
-        }else{
-            return redirect(route('dashboard'));
+        } else {
+            return redirect(route('immunize')); // Updated to match route name
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'vaccine' => 'required|string|max:255',
-            'age' => 'required|integer|min:0|max:120',
-            'dosage' => 'required|string|max:255',
-            'venue' => 'required|string|max:255',
-            'notes' => 'required|string|max:255',
-        ]);
+{
+    Log::info("data", [$request->all()]);
+    Log::info('date', [$request->date]);
+    Log::info('time', [$request->time]);
 
-        // Create a new Blotter entry
-        $immunize = new Immunize();
-        $immunize->vaccine = $request->vaccine;
-        $immunize->age = $request->age;
-        $immunize->dosage = $request->dosage;
-        $immunize->venue = $request->venue;
-        $immunize->notes = $request->notes;
-        $immunize->save();
+    $request->validate([
+        'vaccine' => 'required|string|max:255',
+        'age' => 'required|integer|min:0|max:120',
+        'dosage' => 'required|string|max:255',
+        'venue' => 'required|string|max:255',
+        'notes' => 'nullable|string|max:255', // Made notes optional for testing
+        'date' => 'required|string|max:20',
+        'time' => 'required|string|max:10',
+    ]);
 
-        return response()->json(['message' => 'Immunization saved successfully!']); // Return success message
-    }
+    $imunizationDate = $request->date;
+    Log::info('date', [$request->imunizationDate]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Immunize $immunize)
-    {
-        //
-    }
+    // Create a new Immunize entry
+    $immunize = new Immunize();
+    $immunize->vaccine = $request->vaccine;
+    $immunize->age = $request->age;
+    $immunize->dosage = $request->dosage;
+    $immunize->venue = $request->venue;
+    $immunize->notes = $request->notes;
+    $immunize->date = $request->date;
+    $immunize->time = $request->time;
+    
+    $immunize->save();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Immunize $immunize)
-    {
-        //
-    }
+    return response()->json(['message' => 'Immunization saved successfully!']);
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Immunize $immunize)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.
@@ -92,4 +72,34 @@ class ImmunizeController extends Controller
 
         return response()->json(['message' => 'Immunization deleted successfully!'], 200);
     }
+
+    // Add edit and update methods if needed
+
+    public function archived()
+{
+    $user = Auth::user();
+
+    if ($user->user_type == 'captain' || $user->user_type == 'health') {
+        $archivedImmunizes = Immunize::onlyTrashed()->get();
+        return view('admin.archived_immunizations', compact('archivedImmunizes'));
+    } else {
+        return redirect(route('dashboard'));
+    }
+}
+
+public function restore($id)
+{
+    $immunize = Immunize::withTrashed()->findOrFail($id);
+    $immunize->restore();
+
+    return response()->json(['message' => 'Immunization restored successfully!'], 200);
+}
+
+public function forceDelete($id)
+{
+    $immunize = Immunize::withTrashed()->findOrFail($id);
+    $immunize->forceDelete();
+
+    return response()->json(['message' => 'Immunization permanently deleted successfully!'], 200);
+}
 }

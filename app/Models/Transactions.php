@@ -14,14 +14,35 @@ class Transactions extends Model
         'trans_type',
         'purpose',
         'purok',
+        'totalPayable',
         'mode_payment',
+        'status',
+        'file_path'
     ];
 
-    /**
-     * Get the user that owns the transaction.
-     */
+    // Define the possible status values
+    public static $statuses = [
+        'Not Ready',
+        'Processing',
+        'Ready for Pickup',
+        'Picked Up'
+    ];
+
     public function user()
     {
-       return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);
+    }
+
+    // Helper method to check if status transition is valid
+    public function canTransitionTo($newStatus)
+    {
+        $validTransitions = [
+            'Not Ready' => ['Processing'],
+            'Processing' => ['Ready for Pickup'],
+            'Ready for Pickup' => ['Picked Up'],
+            'Picked Up' => []
+        ];
+
+        return in_array($newStatus, $validTransitions[$this->status] ?? []);
     }
 }

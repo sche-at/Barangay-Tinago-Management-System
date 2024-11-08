@@ -14,18 +14,20 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->String('trans_type');
-            $table->String('purpose');
-            $table->String('purok');
-            $table->String('mode_payment');
-            $table->String('file_path')->nullable();
+            $table->string('trans_type');
+            $table->string('purpose');
+            $table->string('purok');
+            $table->decimal('totalPayable', 10, 2);
+            $table->string('mode_payment');
+            $table->string('file_path')->nullable();
+            $table->string('status')->default('not ready'); // Add this line
             $table->timestamps();
 
-             // Set up the foreign key constraint
-             $table->foreign('user_id')
-             ->references('id')
-             ->on('users')
-             ->onDelete('cascade'); // Delete comments when user is deleted
+            // Set up the foreign key constraint
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade'); // Delete comments when user is deleted
         });
     }
 

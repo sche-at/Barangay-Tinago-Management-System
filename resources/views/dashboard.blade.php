@@ -1,129 +1,311 @@
-
 @include('templates.header')
 
 <style>
     .announcement-title {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #007bff;
+        text-align: center;
+        margin: 30px 0;
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0D7C66;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
-    .event-list {
-      margin-top: 20px;
-    }
-    .event-item {
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-      transition: transform 0.2s ease-in-out;
-    }
-    .event-item:hover {
-      transform: scale(1.02);
-    }
-    .event-date {
-      background-color: #0D7C66;
-      color: white;
-      padding: 10px 15px;
-      text-align: center;
-      border-radius: 5px;
-      font-size: 1.2rem;
-    }
-    .event-title {
-      font-weight: bold;
-      font-size: 1.5rem;
-    }
-    .event-location {
-      color: gray;
-    }
-    .flame {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .flame:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-    marquee {
-            font-size: 24px; /* Make the text larger */
-            color: green;    /* Change the text color to green */
-        }
 
-        .marquee-text {
-            background-color: #e0f7e0; /* Light green background */
-            padding: 5px; /* Padding around the text */
-            border: 2px solid green; /* Green border around the text */
-            border-radius: 5px; /* Rounded corners */
-            display: inline-block; /* Ensures the styles wrap only the text */
-        }
-    </style>
+    .event-list {
+        margin-top: 30px;
+        padding: 0 20px;
+    }
+
+    .event-item {
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(13, 124, 102, 0.1);
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        border-left: 5px solid #0D7C66;
+        background: linear-gradient(to right, #ffffff, #f8f9fa);
+        margin-left: 40%;
+        width: 90%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .event-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(13, 124, 102, 0.15);
+    }
+
+    .event-date {
+        background: linear-gradient(135deg, #0D7C66, #0a5d4d);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 8px rgba(13, 124, 102, 0.2);
+    }
+
+    .event-date .number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .event-title {
+        font-weight: bold;
+        font-size: 1.6rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+    }
+
+    .event-location {
+        color: #566573;
+        font-size: 1.1rem;
+        margin: 10px 0;
+        padding: 8px 0;
+    }
+
+    .badge {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        border-radius: 20px;
+        margin-top: 10px;
+    }
+
+    .bg-danger {
+        background-color: #e74c3c !important;
+    }
+
+    .bg-info {
+        background-color: #3498db !important;
+    }
+
+   
+
+    .immunization-details {
+        background-color: #f8f9fa;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #e9ecef;
+    }
+
+    .text-muted {
+        color: #626567 !important;
+        font-size: 1rem;
+    }
+
+    .mt-2 {
+        margin-top: 15px !important;
+    }
+
+    marquee {
+        font-size: 30px;
+        margin: 20px 0;
+    }
+.scroll{
+    background: linear-gradient(45deg, #0D7C66, #0a5d4d);
+}
+    .marquee-text {
+        
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        box-shadow: 0 4px 6px rgba(13, 124, 102, 0.1);
+        display: inline-block;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    /* QR Code Styling */
+    .qr-container {
+        position: fixed;
+        left: 300px;
+        top: 55%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        background-color: white;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        
+    }
+
+    .qr-container:hover {
+        transform: translateY(-52%) scale(1.05);
+    }
+
+    .qr-container img {
+    border-radius: 8px !important;
+    width: 500px !important;    /* Change this value to whatever size you want */
+    height: 500px !important;   /* Keep same as width */
+    object-fit: contain !important;
+}
+
+    /* Additional Enhancements */
+    strong {
+        color: #0D7C66;
+        font-weight: 600;
+    }
+
+    p {
+        line-height: 1.6;
+        color: #444;
+    }
+    /* Update QR container style to include padding for text */
+.qr-container {
+    position: fixed;
+    left: 300px;
+    top: 65%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    background-color: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.qr-container:hover {
+    transform: translateY(-52%) scale(1.05);
+}
+
+/* Style for the payment text inside QR container */
+.qr-payment-text {
+    background: linear-gradient(45deg, #0D7C66, #0a5d4d);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+
 </style>
 
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid px-4">
-        @if(Auth::user()->user_type == "resident")
-        @php
-          $prenatals = App\Models\Prenatal::all()->toArray();
-          $immunizes = App\Models\Immunize::all()->toArray();
-          $events = App\Models\Event::all()->toArray();
+            @if(Auth::user()->user_type == "resident")
+            @php
+                $prenatals = App\Models\Prenatal::select('*', 'created_at as sort_date')->get()->toArray();
+                $immunizes = App\Models\Immunize::select('*', 'created_at as sort_date')->get()->toArray();
+                $events = App\Models\Event::select('*', 'created_at as sort_date')->get()->toArray();
 
-          $allRecordsArray = array_merge($prenatals, $immunizes, $events);
-        @endphp
-        <div class="announcement-title">Announcements </div>
-         <!-- Running text for GCash payment information -->
-         <marquee behavior="scroll" direction="left" scrollamount="7">
-          <span class="marquee-text">"PLEASE USE THIS NUMBER 090-0000-0000 FOR PAYMENT VIA GCASH"</span>
-      </marquee>
-        <div class="event-list">
-          @foreach($allRecordsArray as $record)
-          <div class="row event-item bg-light">
-              <div class="col-md-2 text-center">
-                  <div class="event-date">
-                      <div>{{ \Carbon\Carbon::parse($record['created_at'])->format('M. d, Y') }}</div>
-                      <div>
-                          @if(isset($record['activity'])) <!-- Assuming there's a field to identify prenatal -->
-                              <span class="badge bg-danger">Pre-natal</span>
-                          @elseif(isset($record['vaccine'])) <!-- Assuming there's a field to identify immunize -->
-                              <span class="badge bg-info">Immunize</span>
-                          @else
-                              <span class="badge bg-success">Event</span>
-                          @endif
-                      </div>
-                  </div>
+                $allRecordsArray = array_merge($prenatals, $immunizes, $events);
+                usort($allRecordsArray, function($a, $b) {
+                    return strtotime($b['created_at']) - strtotime($a['created_at']);
+                });
+            @endphp
+
+            <div class="announcement-title">📢 Announcements</div>
+            
+            <div class="qr-container">
+              <div class="qr-payment-text">
+                  PLEASE SCAN THE CODE FOR PAYMENT 💳
               </div>
-              <div class="col-md-10">
-                  <div class="event-title">
-                    @if(isset($record['activity'])) <!-- Assuming there's a field to identify prenatal -->
-                     {{ $record['activity'] }}
-                    @elseif(isset($record['vaccine'])) <!-- Assuming there's a field to identify immunize -->
-                      {{ $record['vaccine'] }}
-                    @else
-                      {{ $record['event_type'] }}
-                    @endif
+              @if(file_exists(public_path('assets/img/gcash.jpg')))
+                  <img src="{{ asset('assets/img/gcash.jpg') }}" alt="QR Code">
+              @else
+                  <div class="qr-placeholder">
+                      <span>QR</span>
                   </div>
-                  <div class="event-location">
-                    @if(isset($record['activity'])) <!-- Assuming there's a field to identify prenatal -->
-                     {{ $record['venue'] }}
-                    @elseif(isset($record['vaccine'])) <!-- Assuming there's a field to identify immunize -->
-                      {{ $record['venue'] }}
-                    @else
-                      {{ $record['event_venue'] }}
-                    @endif
-                  </div> <!-- Assuming a location field exists -->
-                  <p>
-                    @if(isset($record['activity'])) <!-- Assuming there's a field to identify prenatal -->
-                      {{ 'No description available.' }}
-                    @elseif(isset($record['vaccine'])) <!-- Assuming there's a field to identify immunize -->
-                      {{ $record['notes'] }}
-                    @else
-                      {{ 'No description available.' }}
-                    @endif
-                  </p> <!-- Assuming a description field exists -->
-              </div>
+              @endif
           </div>
-          @endforeach
+<div class= "scroll">
+            <marquee behavior="scroll" direction="left" scrollamount="15">
+                <span class="marquee-text">🏢 BARANGAY TINAGO MANAGEMENT SYSTEM 🏢</span>
+            </marquee>
+</div>
+            <div class="event-list">
+                @foreach($allRecordsArray as $key => $record)
+                <div class="row event-item">
+                    <div class="col-md-4">
+                        <div class="event-date">
+                            <div class="number">{{ $key + 1 }}</div>
+                            <div>
+                                @if(isset($record['activity']))
+                                    When: {{ \Carbon\Carbon::parse($record['created_at'])->format('M. d, Y') }}
+                                @elseif(isset($record['vaccine']))
+                                    <div>When: {{ \Carbon\Carbon::parse($record['date'])->format('M. d, Y') }}</div>
+                                    <div>@ {{ \Carbon\Carbon::parse($record['time'])->format('h:i A') }}</div>
+                                @else
+                                    <div>When: {{ \Carbon\Carbon::parse($record['event_date'])->format('M. d, Y') }}</div>
+                                    <div>@ {{ \Carbon\Carbon::parse($record['event_time'])->format('h:i A') }}</div>
+                                @endif
+                            </div>
+                            <div>
+                                @if(isset($record['activity']))
+                                    <span class="badge bg-danger">Pre-natal</span>
+                                @elseif(isset($record['vaccine']))
+                                    <span class="badge bg-info">Immunization Announcement</span>
+                                @else
+                                    <span class="badge bg-success">Event Announement</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="event-title">
+                            @if(isset($record['activity']))
+                                <strong>Activity:</strong> {{ $record['activity'] }}
+                            @elseif(isset($record['vaccine']))
+                                <strong>Vaccine:</strong> {{ $record['vaccine'] }}
+                                <div class="immunization-details">
+                                    <strong>Required Age:</strong> {{ $record['age'] }} years old<br>
+                                    <strong>Dosage:</strong> {{ $record['dosage'] }}
+                                </div>
+                            @else
+                                <strong>Event:</strong> {{ $record['event_type'] }}
+                            @endif
+                        </div>
+                        <div class="event-location">
+                            @if(isset($record['activity']))
+                                <strong>Venue:</strong> {{ $record['venue'] }}
+                            @elseif(isset($record['vaccine']))
+                                <strong>Venue:</strong> {{ $record['venue'] }}
+                            @else
+                                <strong>Venue:</strong> {{ $record['event_venue'] }}
+                            @endif
+                        </div>
+                        <p class="mt-2">
+                            @if(isset($record['activity']))
+                                {{ 'No description available.' }}
+                            @elseif(isset($record['vaccine']))
+                                <strong>Additional Notes:</strong> {{ $record['notes'] ?: 'No additional notes available.' }}
+                            @else
+                                {{ 'No description available.' }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                @endforeach
+           
         </div>
+    </main>
+</div>
         
        
         @else

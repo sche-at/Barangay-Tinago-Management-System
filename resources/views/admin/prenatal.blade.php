@@ -9,7 +9,6 @@
                         <i class="fas fa-table me-1"></i>
                         Prenatal Schedule
                     </div>
-                    <!-- Add Blotter Button -->
                     <button class="btn btn-primary" id="addPrenatalBtn" data-bs-toggle="modal" data-bs-target="#PrenatalModal">Add Event</button>
                 </div>
                 <div class="card-body">
@@ -30,8 +29,8 @@
                                     <td>{{ $row->id }}</td>
                                     <td>{{ $row->activity }}</td>
                                     <td>{{ $row->venue }}</td>
-                                    <td>{{ $row->created_at->format('F j, Y') }}</td> <!-- For the full month name and year -->
-                                    <td>{{ $row->created_at->format('h:i A') }}</td> <!-- For time with AM/PM -->
+                                    <td>{{ date('F j, Y', strtotime($row->schedule_date)) }}</td>
+                                    <td>{{ date('h:i A', strtotime($row->schedule_time)) }}</td>
                                     <td>
                                         <button class="btn btn-danger btn-sm" onclick="deletePrenatal({{ $row->id }})">Delete</button>
                                     </td>
@@ -59,7 +58,15 @@
                             </div>
                             <div class="mb-3">
                                 <label for="venue" class="form-label">Venue</label>
-                                <input type="text" class="form-control" id="venue" name="venu" placeholder="Enter venue" required>
+                                <input type="text" class="form-control" id="venue" name="venue" placeholder="Enter venue" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="scheduleDate" class="form-label">Schedule Date</label>
+                                <input type="date" class="form-control" id="scheduleDate" name="schedule_date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="scheduleTime" class="form-label">Schedule Time</label>
+                                <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                             </div>
                         </form>
                     </div>
@@ -71,72 +78,67 @@
             </div>
         </div>
 
-
-
 @include('templates.footer')
 </div>
 
 <script>
 document.getElementById('savePrenatalBtn').addEventListener('click', function() {
     const data = {
-            activity: document.getElementById('activity').value, // Match vaccine
-            venue: document.getElementById('venue').value, // Match venue
-           
-        };
+        activity: document.getElementById('activity').value,
+        venue: document.getElementById('venue').value,
+        schedule_date: document.getElementById('scheduleDate').value,
+        schedule_time: document.getElementById('scheduleTime').value
+    };
 
-        fetch('/insertprenatal', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (response.ok) {
-                    $('#PrenatalModal').modal('hide');
-                    alert('Prenatal saved successfully!'); // Alert success message
-                    location.reload(); // Reload the page after saving
-                } else {
-                    return response.json().then(data => {
-                        alert(data.message || 'Error saving Prenatal!'); // Alert error message
-                    }).catch(() => {
-                        alert('An error occurred while saving!'); // Fallback error message
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An unexpected error occurred!'); // Alert error message for unexpected errors
+    fetch('/insertprenatal', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (response.ok) {
+            $('#PrenatalModal').modal('hide');
+            alert('Prenatal saved successfully!');
+            location.reload();
+        } else {
+            return response.json().then(data => {
+                alert(data.message || 'Error saving Prenatal!');
+            }).catch(() => {
+                alert('An error occurred while saving!');
             });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An unexpected error occurred!');
+    });
+});
 
-        });
-
-            function deletePrenatal(id) {
-            if (confirm('Are you sure you want to delete this prenatal?')) {
-                fetch(`/prenataldelete/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Prenatal deleted successfully!'); // Alert success message
-                        location.reload(); // Reload the page after deletion
-                    } else {
-                        return response.json().then(data => {
-                            alert(data.message || 'Error deleting prenatal!'); // Alert error message
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An unexpected error occurred!'); // Alert error message for unexpected errors
+function deletePrenatal(id) {
+    if (confirm('Are you sure you want to delete this prenatal?')) {
+        fetch(`/prenataldelete/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Prenatal deleted successfully!');
+                location.reload();
+            } else {
+                return response.json().then(data => {
+                    alert(data.message || 'Error deleting prenatal!');
                 });
             }
-        }
-   
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An unexpected error occurred!');
+        });
+    }
+}
 </script>
-
-

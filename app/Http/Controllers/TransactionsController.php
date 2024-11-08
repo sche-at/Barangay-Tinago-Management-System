@@ -24,56 +24,40 @@ class TransactionsController extends Controller
         }
     }
 
-    public function history()
-    {
-        $user = Auth::user();
-
-        if($user->user_type == 'resident'){
-            $transactions = Transactions::with('user')
-            ->where('user_id', $user->id) // Filter by the authenticated user's id
-            ->get();
-            return view('resident.history', compact('transactions'));
-        } else {
-            return redirect(route('dashboard'));
-        }
-    }
+   
 
     public function report()
     {
         $user = Auth::user();
-
+    
         if($user->user_type == 'treasurer' || $user->user_type == 'captain'){
-            $transactions = Transactions::with('user')->get();
-            return view('admin.report', compact('transactions'));
+            $transactions = Transactions::with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+            // Group transactions by status
+            $notReadyTransactions = $transactions->where('status', 'Not Ready');
+            $processingTransactions = $transactions->where('status', 'Processing');
+            $readyTransactions = $transactions->where('status', 'Ready for Pickup');
+            $pickedUpTransactions = $transactions->where('status', 'Picked Up');
+    
+            return view('admin.report', compact(
+                'transactions', 
+                'notReadyTransactions',
+                'processingTransactions',
+                'readyTransactions',
+                'pickedUpTransactions'
+            ));
         } else {
             return redirect(route('dashboard'));
         }
     }
 
     public function export($id)
-{
-    $transaction = Transactions::with('user')->findOrFail($id);
-
-    $templatePath = public_path('templates/example.docx');
-    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
-
-    // Replace placeholders with transaction data
-    $templateProcessor->setValue('name', $transaction->user->name);
-    $templateProcessor->setValue('purok', $transaction->purok);
-    $templateProcessor->setValue('purpose', $transaction->purpose);
-    $templateProcessor->setValue('title', $transaction->trans_type);
-    $templateProcessor->setValue('day', $transaction->created_at->format('j'));
-    $templateProcessor->setValue('month', $transaction->created_at->format('F'));
-    $templateProcessor->setValue('year', $transaction->created_at->format('Y'));
-
-    // Save the modified file to a temporary path
-    $fileName = 'transaction_' . $transaction->id . '.docx';
-    $tempPath = storage_path('app/public/' . $fileName);
-    $templateProcessor->saveAs($tempPath);
-
-    // Download the file and delete it after sending
-    return response()->download($tempPath)->deleteFileAfterSend(true);
-}
+    {
+        $transaction = Transactions::with('user')->findOrFail($id);
+        return view('print-document', compact('transaction'));
+    }
 
     
 
@@ -127,8 +111,9 @@ class TransactionsController extends Controller
             $transactions->trans_type = $type;
             $transactions->purok = $request->purok;
             $transactions->purpose = $request->purpose[$index];
+            $transactions->totalPayable = $request->totalPayable;
             $transactions->mode_payment = $request->mode_payment;
-
+            $transactions->status = 'Not Ready'; // Set initial status
             // Assign file path if available
             if ($filePath) {
                 $transactions->file_path = $filePath;
@@ -177,26 +162,125 @@ class TransactionsController extends Controller
         //
     }
 
-    public function updateStatus($id)
-{
-    $transaction = Transactions::findOrFail($id);
+    public function updateStatus(Request $request, $id)
+    {
+        $transaction = Transactions::findOrFail($id);
+        $newStatus = $request->input('new_status');
+        
+        // Define valid status transitions
+        $validTransitions = [
+            'Not Ready' => 'Processing',
+            'Processing' => 'Ready for Pickup',
+            'Ready for Pickup' => 'Picked Up'
+        ];
 
-    // Define the status order for toggling
-    $statuses = ['Not Ready', 'Processing', 'Ready for Pickup'];
-    $currentStatusIndex = array_search($transaction->status, $statuses);
-    $nextStatusIndex = ($currentStatusIndex + 1) % count($statuses);
-    $transaction->status = $statuses[$nextStatusIndex];
+        // Validate the status transition
+        if (isset($validTransitions[$transaction->status]) && 
+            $validTransitions[$transaction->status] === $newStatus) {
+            
+            $transaction->status = $newStatus;
+            $transaction->save();
 
-    $transaction->save();
+            return redirect()->back()->with('success', 'Transaction status updated successfully!');
+        }
 
-    return redirect()->back()->with('status', 'Transaction status updated successfully!');
-}
+        return redirect()->back()->with('error', 'Invalid status transition.');
+    }
 public function clearHistory()
 {
-    Transactions::truncate(); // This will delete all records in the transactions table.
-    return redirect()->back()->with('success', 'Transaction history cleared successfully.');
+    $user = Auth::user();
+
+    if($user->user_type == 'resident') {
+        // Instead of deleting, mark transactions as deleted
+        Transactions::where('user_id', $user->id)
+            ->update(['deleted_by_user' => true]);
+            
+        return redirect()->back()->with('success', 'Your transaction history has been cleared successfully.');
+    }
+
+    return redirect()->back()->with('error', 'Unauthorized action.');
+}
+
+public function history()
+{
+    $user = Auth::user();
+
+    if($user->user_type == 'resident'){
+        $transactions = Transactions::with('user')
+            ->where('user_id', $user->id)
+            ->where('deleted_by_user', false)  // Only show non-deleted transactions
+            ->get();
+        return view('resident.history', compact('transactions'));
+    } else {
+        return redirect(route('dashboard'));
+    }
 }
 
 
+public function generateReport()
+{
+    $user = Auth::user();
 
+    // Check if user is authorized to view the report
+    if (!in_array($user->user_type, ['treasurer', 'captain'])) {
+        return redirect(route('dashboard'));
+    }
+
+    // Get only completed transactions
+    $transactions = Transactions::with('user')
+        ->where('status', 'Picked Up')  // Only get completed transactions
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // Calculate summary data
+    $summaryData = [
+        'totalTransactions' => $transactions->count(),
+        'paymentMethods' => $transactions->pluck('mode_payment')->unique(),
+        'totalAmount' => $transactions->sum('totalPayable'),
+        'generatedDate' => now()->format('F j, Y')
+    ];
+
+    return view('admin.transaction-report', [
+        'transactions' => $transactions,
+        'summaryData' => $summaryData
+    ]);
+}
+public function deleteTransaction($id)
+    {
+        $transaction = Transactions::findOrFail($id);
+        
+        // Only allow deletion if status is not "Picked Up"
+        if ($transaction->status !== 'Picked Up') {
+            $transaction->delete();
+            return redirect()->back()->with('success', 'Transaction deleted successfully.');
+        }
+        
+        return redirect()->back()->with('error', 'Cannot delete completed transactions.');
+    }
+    public function clearCompleted()
+    {
+        // Delete only completed transactions
+        Transactions::where('status', 'Picked Up')->delete();
+        
+        return redirect()->back()->with('success', 'All completed transactions have been cleared successfully.');
+    }
+    
+    public function showCertificate($id)
+{
+    $transaction = Transactions::with('user')->findOrFail($id);
+    return view('budgets.print-document', compact('transaction'));
+}
+
+public function updateCertificate(Request $request, $id)
+{
+    $transaction = Transactions::findOrFail($id);
+    $transaction->purpose = $request->purpose;
+    $transaction->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Certificate updated successfully'
+    ]);
+}
+    
 }

@@ -15,13 +15,15 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->string('event_type'); // Changed to lowercase for consistency
-            $table->string('event_venue'); // Changed to lowercase for consistency
-            $table->string('task_assigned'); // Changed to lowercase for consistency
-            $table->timestamps(); // Moved to the end
+            $table->string('event_type');
+            $table->string('event_venue');
+            $table->string('task_assigned');
+            $table->date('event_date');    // Added for event date
+            $table->time('event_time');    // Added for event time
+            $table->timestamps();
         });
     }
-
+    
     /**
      * Reverse the migrations.
      *

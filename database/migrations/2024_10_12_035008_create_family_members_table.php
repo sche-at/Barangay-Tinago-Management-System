@@ -15,11 +15,15 @@ class CreateFamilyMembersTable extends Migration
     {
         Schema::create('family_members', function (Blueprint $table) {
             $table->id(); // Auto-incrementing ID
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Foreign key referencing users table
-            $table->string('name'); // Family member's name
-            $table->string('relationship'); // Relationship to the user
+            $table->foreignId('residence_id')->constrained('residences')->onDelete('cascade'); // Foreign key referencing residences table
+            $table->string('first_name'); // Family member's first name
+            $table->string('middle_name')->nullable(); // Family member's middle name
+            $table->string('last_name'); // Family member's last name
+            $table->string('suffix')->nullable(); // Family member's suffix
+            $table->string('relationship'); // Relationship to the resident
             $table->date('birthdate')->nullable(); // Birthdate, nullable if not provided
             $table->string('birthplace')->nullable(); // Birthplace, nullable if not provided
+            $table->integer('age')->nullable(); // Age, calculated based on birthdate
             $table->timestamps(); // Created at and updated at timestamps
         });
     }

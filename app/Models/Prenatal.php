@@ -9,10 +9,17 @@ class Prenatal extends Model
 {
     use HasFactory;
 
-    protected $table = 'prenatals'; // Optional if the table name is the plural form of the model name
-
     protected $fillable = [
-        'activity', 
-        'venue'
+        'activity',
+        'venue',
+        'schedule_date',
+        'schedule_time'
+    ];
+
+    protected $casts = [
+        'schedule_date' => 'date',
+        'schedule_time' => 'datetime:H:i'
     ];
 }
+
+

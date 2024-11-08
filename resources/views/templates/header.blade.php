@@ -140,7 +140,7 @@
                             <div class="collapse" id="collapseLayoutsworker" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <a class="nav-link" href="{{ route('immunize') }}">Immunization Schedule</a>
-                                    <a class="nav-link" href="{{ route('prenatal') }}">Prenatal Schedule</a>
+                                    {{-- <a class="nav-link" href="{{ route('prenatal') }}">Prenatal Schedule</a> --}}
                                 </nav>
                             </div>
                             

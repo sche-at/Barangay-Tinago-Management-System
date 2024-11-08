@@ -1,17 +1,42 @@
 @include('templates.header')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div id="layoutSidenav_content">
     <main>
         <div class="container-fluid mt-4">
+            {{-- @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif --}}
+
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <i class="fas fa-table me-1"></i>
-                        Residence List
+                        Archived Residence List
                     </div>
-                    <button class="btn btn-secondary me-2" onclick="window.location.href='{{ route('residences.archived') }}'"><i class="fas fa-archive me-1"></i>View Archived</button>
-                   
+                    <a href="{{ route('residence.view') }}" class="btn btn-primary btn-sm text-white text-decoration-none">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Residents
+                    </a>                </div>
+
+                <!-- Search Form -->
+                <div class="card-body border-bottom">
+                    <form action="{{ route('residences.archived') }}" method="GET" class="row g-3">
+                        {{-- <div class="col-md-6"> --}}
+                            {{-- <input type="text" 
+                                name="search" 
+                                value="{{ request('search') }}" 
+                                placeholder="Search by name, purok, or address..."
+                                class="form-control"> --}}
+                        </div>
+                        {{-- <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a href="{{ route('residences.archived') }}" class="btn btn-secondary">Reset</a>
+                        </div> --}}
+                    </form>
                 </div>
+
                 <div class="card-body">
                     <table id="datatablesSimple" width="100%">
                         <thead>
@@ -19,25 +44,57 @@
                                 <th>Full Name</th>
                                 <th>Contact Number</th>
                                 <th>Purok</th>
+                                <th>Archived Date</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach($residences as $res)
-                        <tr>
-                            <td>{{ $res->first_name }} {{ $res->middle_name ? $res->middle_name . ' ' : '' }}{{ $res->last_name }}{{ $res->suffix != 'N/A' ? ' ' . $res->suffix : '' }}</td>
-                            <td>{{ $res->contact_number }}</td>
-                            <td>{{ $res->purok }}</td>
-                            <td>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteResidence({{ $res->id }})">Delete</button>
-                                        <button class="btn btn-primary btn-sm" data-id="{{ $res->id }}" onclick="showResidenceDetails({{ $res->id }})" data-bs-toggle="modal" data-bs-target="#ResidentModal">View Details</button>
-                                    </td>
-                                </tr>
-                         @endforeach
+                            @forelse($archivedResidences as $res)
+                            <tr>
+                                <td>
+                                    <div>{{ $res->first_name }} {{ $res->middle_name ? $res->middle_name . ' ' : '' }}{{ $res->last_name }}{{ $res->suffix != 'N/A' ? ' ' . $res->suffix : '' }}</div>
+                                    {{-- <div class="small text-muted">Age: {{ $res->age }}</div> --}}
+                                </td>
+                                <td>
+                                    <div>{{ $res->contact_number }}</div>
+                                    {{-- <div class="small text-muted">{{ $res->occupation }}</div> --}}
+                                </td>
+                                <td>
+                                    <div>Purok {{ $res->purok }}</div>
+                                    {{-- <div class="small text-muted">{{ $res->address }}</div> --}}
+                                </td>
+                                <td>
+                                    <div>{{ $res->deleted_at->format('M d, Y') }}</div>
+                                    {{-- <div class="small text-muted">{{ $res->deleted_at->format('h:i A') }}</div> --}}
+                                </td>
+                                <td>
+                                    <form action="{{ route('residences.restore', $res->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success btn-sm">  <i class="fas fa-undo me-1"></i>Restore</button>
+                                    </form>
+                                    <form action="{{ route('residences.forceDelete', $res->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this record?')"><i class="fas fa-trash me-1"></i>Delete</button>
+                                    </form>
+                                    <button class="btn btn-primary btn-sm" data-id="{{ $res->id }}" onclick="showResidenceDetails({{ $res->id }})" data-bs-toggle="modal" data-bs-target="#ResidentModal">View Details</button>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No archived records found.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
+
+                    <!-- Pagination -->
+                    <div class="mt-4">
+                        {{ $archivedResidences->links() }}
+                    </div>
                 </div>
             </div>
+            
         </div>
     </main>
 
@@ -50,7 +107,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="residentForm">
-                    @csrf
+                        @csrf
                         <input type="hidden" id="residentId">
                         <div class="row mb-3">
                             <div class="col-md-3">
@@ -58,7 +115,7 @@
                                 <input type="text" name="first_name" class="form-control" id="firstName" placeholder="Enter first name" required>
                             </div>
                             <div class="col-md-3">
-                                <label for="middleName" class="form-label">Middle Name (if applicable)</label>
+                                <label for="middleName" class="form-label">Middle Name</label>
                                 <input type="text" name="middle_name" class="form-control" id="middleName" placeholder="Enter middle name">
                             </div>
                             <div class="col-md-3">
@@ -68,7 +125,6 @@
                             <div class="col-md-3">
                                 <label for="suffix" class="form-label">Suffix</label>
                                 <select name="suffix" class="form-select" id="suffix">
-                                    <option disabled selected value="">select suffix (if applicable) </option>
                                     <option value="N/A">N/A</option>
                                     <option value="Jr.">Jr.</option>
                                     <option value="Sr.">Sr.</option>
@@ -82,7 +138,7 @@
                             <div class="col-md-3">
                                 <label for="sex" class="form-label">Sex</label>
                                 <select name="sex" class="form-select" id="sex" required>
-                                    <option disabled selected value="">Select your sex</option>
+                                    <option value="">Select your sex</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
@@ -102,7 +158,7 @@
                             <div class="col">
                                 <label for="civilStatus" class="form-label">Civil Status</label>
                                 <select name="civil_status" class="form-select" id="civilStatus" required>
-                                    <option disabled selected value="">Select civil status</option>
+                                    <option value="">Select civil status</option>
                                     <option value="single">Single</option>
                                     <option value="married">Married</option>
                                     <option value="divorced">Divorced</option>
@@ -112,7 +168,7 @@
                             <div class="col">
                                 <label for="purok" class="form-label">Purok</label>
                                  <select name="purok" class="form-control" id="purok" placeholder="Enter Purok" required>
-                                    <option disabled selected  value="">Select Purok</option>
+                                    <option value="">Select Purok</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -137,7 +193,6 @@
                             <div class="col">
                                 <label for="educationalLevel" class="form-label">Educational Level</label>
                                 <select name="educational_level" class="form-select" id="educationalLevel" required>
-                                    <option disabled selected value="">Select Educational Level</option>
                                     <option value="elementary_level">Elementary Level</option>
                                     <option value="elementary_graduate">Elementary Graduate</option>
                                     <option value="highschool_level">Highschool Levle</option>
@@ -156,7 +211,7 @@
                             <div class="col">
                                 <label for="employmentStatus" class="form-label">Employment Status</label>
                                 <select name="employment_status" class="form-select" id="employmentStatus" required>
-                                    <option disabled selected value="">Select employment status</option>
+                                    <option value="">Select employment status</option>
                                     <option value="employed">Employed</option>
                                     <option value="unemployed">Unemployed</option>
                                     <option value="self-employed">Self-employed</option>
@@ -183,7 +238,7 @@
                                     <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName1" placeholder="First name" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="familyMiddleName1" class="form-label">Middle Name (ifapplicabled)</label>
+                                    <label for="familyMiddleName1" class="form-label">Middle Name</label>
                                     <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName1" placeholder="Middle name">
                                 </div>
                                 <div class="col-md-3">
@@ -193,7 +248,6 @@
                                 <div class="col-md-3">
                                     <label for="familySuffix1" class="form-label">Suffix</label>
                                     <select name="family_suffixes[]" class="form-select" id="familySuffix1">
-                                        <option disabled selected value="">select suffix (if applicable)</option>
                                         <option value="N/A">N/A</option>
                                         <option value="Jr.">Jr.</option>
                                         <option value="Sr.">Sr.</option>
@@ -204,6 +258,18 @@
                                 <div class="col">
                                     <label for="familyRelationship1" class="form-label">Family Relationship</label>
                                     <select name="family_relationships[]" class="form-control" id="familyRelationship1" required>
+                                        <option value="">Select relationship</option>
+                                        <option value="spouse">Spouse</option>
+                                        <option value="child">Child</option>
+                                        <option value="parent">Parent</option>
+                                        <option value="sibling">Sibling</option>
+                                        <option value="grandparent">Grandparent</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                
+                                
+
                                 <div class="col-md-2">
                                     <label for="familyBirthdate1" class="form-label">Birthdate</label>
                                     <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate1" required>
@@ -216,106 +282,74 @@
                                     <label for="familyBirthplace1" class="form-label">Family Birthplace</label>
                                     <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace1" placeholder="Enter birthplace" required>
                                 </div>
-                                <div class="col mt-4">
+                                {{-- <div class="col mt-4">
                                     <button type="button" class="btn btn-danger remove-member">Remove</button>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary" id="addFamilyMember">Add Family Member</button>
+                        {{-- <button type="button" class="btn btn-primary" id="addFamilyMember">Add Family Member</button> --}}
+                
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveResidentBtn">Save Changes</button>
+                    {{-- <button type="button" class="btn btn-primary" id="saveResidentBtn">Save Changes</button> --}}
                 </div>
             </div>
         </div>
     </div>
-    
-@include('templates.footer')
 </div>
 
+@include('templates.footer')
+
 <script>
-
-    
-
     // Function to calculate age
-function calculateAge(birthDate, ageField) {
-    const dob = new Date(birthDate);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDifference = today.getMonth() - dob.getMonth();
-    
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
-        age--;
+    function calculateAge(birthDate, ageField) {
+        const dob = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDifference = today.getMonth() - dob.getMonth();
+        
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        ageField.value = age;
     }
     
-    ageField.value = age;
-}
+    // Show residence details
+    function showResidenceDetails(id) {
+        $.ajax({
+            url: `/residences/archived/${id}`,
+            type: 'GET',
+            success: function(residence) {
+                // Basic Information
+                $('#residentId').val(residence.id);
+                $('#firstName').val(residence.first_name).prop('disabled', true);
+                $('#middleName').val(residence.middle_name).prop('disabled', true);
+                $('#lastName').val(residence.last_name).prop('disabled', true);
+                $('#suffix').val(residence.suffix || 'N/A').prop('disabled', true);
+                $('#sex').val(residence.sex).prop('disabled', true);
+                $('#dob').val(residence.date_of_birth).prop('disabled', true);
+                $('#age').val(residence.age).prop('disabled', true);
+                $('#civilStatus').val(residence.civil_status).prop('disabled', true);
+                $('#purok').val(residence.purok).prop('disabled', true);
+                $('#currentAddress').val(residence.address).prop('disabled', true);
+                $('#placeOfBirth').val(residence.place_of_birth).prop('disabled', true);
+                $('#educationalLevel').val(residence.educational_level).prop('disabled', true);
+                $('#occupation').val(residence.occupation).prop('disabled', true);
+                $('#employmentStatus').val(residence.employment_status).prop('disabled', true);
+                $('#contactNumber').val(residence.contact_number).prop('disabled', true);
+    
+                // Handle Family Members
+                const familyMembersContainer = $('#familyMembers');
+familyMembersContainer.find('.family-member').not(':first').remove(); // Remove additional family member rows
 
-
- // Fix for showResidenceDetails function
- function showResidenceDetails(id) {
-    $.ajax({
-        url: `/residences/${id}`,
-        type: 'GET',
-        success: function(residence) {
-            // Fill out the modal with residence details
-            $('#residentId').val(residence.id);
-            $('#firstName').val(residence.first_name);
-            $('#middleName').val(residence.middle_name);
-            $('#lastName').val(residence.last_name);
-            $('#suffix').val(residence.suffix || 'N/A');
-            $('#sex').val(residence.sex);
-            $('#dob').val(residence.date_of_birth);
-            $('#age').val(residence.age);
-            $('#civilStatus').val(residence.civil_status);
-            $('#purok').val(residence.purok);
-            $('#currentAddress').val(residence.address);
-            $('#placeOfBirth').val(residence.place_of_birth);
-            $('#educationalLevel').val(residence.educational_level);
-            $('#occupation').val(residence.occupation);
-            $('#employmentStatus').val(residence.employment_status);
-            $('#contactNumber').val(residence.contact_number);
-
-            // Handle family members
-            const familyMembersContainer = $('#familyMembers');
-            familyMembersContainer.empty();
-
-            if (residence.family_members && residence.family_members.length > 0) {
-                const familyMemberRows = [];
-
-                residence.family_members.forEach((member, index) => {
-                    const familyMemberRow = $('<div>').addClass('row mb-3 family-member');
-
-
-                    familyMemberRow.append(`
-                        <div class="col-md-3">
-                            <label for="familyFirstName${index + 1}" class="form-label">First Name</label>
-                            <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName${index + 1}" value="${member.first_name}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="familyMiddleName${index + 1}" class="form-label">Middle Name</label>
-                            <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName${index + 1}" value="${member.middle_name}">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="familyLastName${index + 1}" class="form-label">Last Name</label>
-                            <input type="text" name="family_last_names[]" class="form-control" id="familyLastName${index + 1}" value="${member.last_name}" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="familySuffix${index + 1}" class="form-label">Suffix</label>
-                            <select name="family_suffixes[]" class="form-select" id="familySuffix${index + 1}">
-                                <option value="N/A" ${member.suffix === 'N/A' ? 'selected' : ''}>N/A</option>
-                                <option value="Jr." ${member.suffix === 'Jr.' ? 'selected' : ''}>Jr.</option>
-                                <option value="Sr." ${member.suffix === 'Sr.' ? 'selected' : ''}>Sr.</option>
-                                <option value="II" ${member.suffix === 'II' ? 'selected' : ''}>II (The Second)</option>
-                                <option value="III" ${member.suffix === 'III' ? 'selected' : ''}>III (The Third)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="familyRelationship${index + 1}" class="form-label">Family Relationship</label>
-                            <select name="family_relationships[]" class="form-select" id="familyRelationship${index + 1}" required>
+if (residence.family_members && residence.family_members.length > 0) {
+    residence.family_members.forEach((member, index) => {
+        const relationshipOptions = `
+            <select name="family_relationships[]" class="form-select" id="familyRelationship${index + 1}" required>
                                 <option value="">Select Family Relationship</option>
                                 <option value="father" ${member.relationship === 'father' ? 'selected' : ''}>Father</option>
                                 <option value="mother" ${member.relationship === 'mother' ? 'selected' : ''}>Mother</option>
@@ -347,206 +381,89 @@ function calculateAge(birthDate, ageField) {
                                 <option value="half-brother" ${member.relationship === 'half-brother' ? 'selected' : ''}>Half-brother</option>
                                 <option value="half-sister" ${member.relationship === 'half-sister' ? 'selected' : ''}>Half-sister</option>
                             </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="familyBirthdate${index + 1}" class="form-label">Birthdate</label>
-                            <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate${index + 1}" value="${member.birthdate}" required>
-                        </div>
-                        <div class="col-md-1">
-                            <label for="familyAge${index + 1}" class="form-label">Age</label>
-                            <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge${index + 1}" value="${calculateAge(member.birthdate)}"  readonly required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="familyBirthplace${index + 1}" class="form-label">Family Birthplace</label>
-                            <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace${index + 1}" value="${member.birthplace}" required>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-member">Remove</button>
-                        </div>
-                    `);
+        `;
 
-                        
-                   
-                    
-                    familyMemberRows.push(familyMemberRow);
-                });
-
-                familyMembersContainer.append(familyMemberRows);
-            } else {
-                familyMembersContainer.append(`
-                    <div class="row mb-3">
-                        <div class="col">
-                            <p>No family members added yet.</p>
-                        </div>
+        if (index === 0) {
+            // Update first row
+            $('#familyFirstName1').val(member.first_name).prop('disabled', true);
+            $('#familyMiddleName1').val(member.middle_name).prop('disabled', true);
+            $('#familyLastName1').val(member.last_name).prop('disabled', true);
+            $('#familySuffix1').val(member.suffix || 'N/A').prop('disabled', true);
+            $('#familyRelationship1')
+                .html(relationshipOptions)
+                .prop('disabled', true);
+            $('#familyBirthdate1').val(member.birthdate).prop('disabled', true);
+            $('#familyAge1').val(calculateAgeValue(member.birthdate)).prop('disabled', true);
+            $('#familyBirthplace1').val(member.birthplace).prop('disabled', true);
+        } else {
+            // Add new rows for additional family members
+            const newRow = `
+                <div class="row mb-3 family-member">
+                    <div class="col-md-3">
+                        <label for="familyFirstName${index + 1}" class="form-label">First Name</label>
+                        <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName${index + 1}" value="${member.first_name || ''}" disabled>
                     </div>
-                `);
-            }
-            
-        },
-        error: function() {
-            alert('Failed to load residence details.');
+                    <div class="col-md-3">
+                        <label for="familyMiddleName${index + 1}" class="form-label">Middle Name</label>
+                        <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName${index + 1}" value="${member.middle_name || ''}" disabled>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="familyLastName${index + 1}" class="form-label">Last Name</label>
+                        <input type="text" name="family_last_names[]" class="form-control" id="familyLastName${index + 1}" value="${member.last_name || ''}" disabled>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="familySuffix${index + 1}" class="form-label">Suffix</label>
+                        <select name="family_suffixes[]" class="form-select" id="familySuffix${index + 1}" disabled>
+                            <option value="N/A" ${member.suffix === 'N/A' ? 'selected' : ''}>N/A</option>
+                            <option value="Jr." ${member.suffix === 'Jr.' ? 'selected' : ''}>Jr.</option>
+                            <option value="Sr." ${member.suffix === 'Sr.' ? 'selected' : ''}>Sr.</option>
+                            <option value="II" ${member.suffix === 'II' ? 'selected' : ''}>II (The Second)</option>
+                            <option value="III" ${member.suffix === 'III' ? 'selected' : ''}>III (The Third)</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="familyRelationship${index + 1}" class="form-label">Family Relationship</label>
+                        <select name="family_relationships[]" class="form-select" id="familyRelationship${index + 1}" disabled>
+                            ${relationshipOptions}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="familyBirthdate${index + 1}" class="form-label">Birthdate</label>
+                        <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate${index + 1}" value="${member.birthdate || ''}" disabled>
+                    </div>
+                    <div class="col-md-1">
+                        <label for="familyAge${index + 1}" class="form-label">Age</label>
+                        <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge${index + 1}" value="${member.birthdate ? calculateAgeValue(member.birthdate) : ''}" disabled>
+                    </div>
+                    <div class="col">
+                        <label for="familyBirthplace${index + 1}" class="form-label">Family Birthplace</label>
+                        <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace${index + 1}" value="${member.birthplace || ''}" disabled>
+                    </div>
+                </div>
+            `;
+            familyMembersContainer.append(newRow);
         }
     });
-
-    function calculateAge(birthDateString) {
-    // Convert string to Date object
-    const birthDate = new Date(birthDateString);
-    const today = new Date();
-
-    // Calculate age
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    
-    return age;
 }
-
-}
-
-
-
-
-// Function to handle updating a residence
-$('#saveResidentBtn').on('click', function() {
-    const id = $('#residentId').val();
-    const formData = $('#residentForm').serialize();
-    $.ajax({
-        url: `/residences/${id}`,
-        type: 'PUT',
-        data: formData,
-        success: function(response) {
-            alert('Residence updated successfully!');
-            location.reload();
-        },
-        error: function(xhr) {
-            alert('An error occurred while updating the residence: ' + xhr.responseJSON.message);
-        }
-    });
-});
-
- // Function to delete residence
-function deleteResidence(id) {
-    if (confirm('Are you sure you want to delete this residence?')) {
-        $.ajax({
-            url: `/residencesdelete/${id}`,
-            type: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                alert('Residence deleted successfully!');
-                location.reload();
             },
             error: function(xhr) {
-                alert('An error occurred while deleting the residence: ' + xhr.responseJSON.message || 'Unknown error');
+                alert('Failed to load residence details: ' + xhr.responseText);
+                console.error('Error loading residence details:', xhr);
             }
         });
     }
-}
-
-
-
-    /// Function to add family members dynamically
-// Function to add family members dynamically
-$('#addFamilyMember').on('click', function() {
-    const memberIndex = $('.family-member').length + 1;
-    $('#familyMembers').append(`
-        <div class="row mb-3 family-member">
-            <div class="col-md-3">
-                <label for="familyFirstName${memberIndex}" class="form-label">First Name</label>
-                <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName${memberIndex}" placeholder="Enter first name" required>
-            </div>
-            <div class="col-md-3">
-                <label for="familyMiddleName${memberIndex}" class="form-label">Middle Name</label>
-                <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName${memberIndex}" placeholder="Enter middle name">
-            </div>
-            <div class="col-md-3">
-                <label for="familyLastName${memberIndex}" class="form-label">Last Name</label>
-                <input type="text" name="family_last_names[]" class="form-control" id="familyLastName${memberIndex}" placeholder="Enter last name" required>
-            </div>
-            <div class="col-md-3">
-                <label for="familySuffix${memberIndex}" class="form-label">Suffix</label>
-                <select name="family_suffixes[]" class="form-select" id="familySuffix${memberIndex}">
-                    <option value="N/A">N/A</option>
-                    <option value="Jr.">Jr.</option>
-                    <option value="Sr.">Sr.</option>
-                    <option value="II">II (The Second)</option>
-                    <option value="III">III (The Third)</option>
-                </select>
-            </div>
-            <div class="col">
-                <label for="familyRelationship${memberIndex}" class="form-label">Family Relationship</label>
-                <select name="family_relationships[]" class="form-select" id="familyRelationship${memberIndex}" required>
-                    <option value="">Select Family Relationship</option>
-                    <option value="father">Father</option>
-                    <option value="mother">Mother</option>
-                    <option value="son">Son</option>
-                    <option value="daughter">Daughter</option>
-                    <option value="brother">Brother</option>
-                    <option value="sister">Sister</option>
-                    <option value="grandmother">Grandmother</option>
-                    <option value="grandfather">Grandfather</option>
-                    <option value="grandson">Grandson</option>
-                    <option value="granddaughter">Granddaughter</option>
-                    <option value="aunt">Aunt</option>
-                    <option value="uncle">Uncle</option>
-                    <option value="nephew">Nephew</option>
-                    <option value="niece">Niece</option>
-                    <option value="cousin">Cousin</option>
-                    <option value="husband">Husband</option>
-                    <option value="wife">Wife</option>
-                    <option value="father-in-law">Father-in-Law</option>
-                    <option value="mother-in-law">Mother-in-Law</option>
-                    <option value="son-in-law">Son-in-law</option>
-                    <option value="daughter-in-law">Daughter-in-law</option>
-                    <option value="brother-in-law">Brother-in-law</option>
-                    <option value="sister-in-law">Sister-in-law</option>
-                    <option value="stepfather">Stepfather</option>
-                    <option value="stepmother">Stepmother</option>
-                    <option value="stepson">Stepson</option>
-                    <option value="stepdaughter">Stepdaughter</option>
-                    <option value="half-brother">Half-brother</option>
-                    <option value="half-sister">Half-sister</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="familyBirthdate${memberIndex}" class="form-label">Birthdate</label>
-                <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate${memberIndex}" required>
-            </div>
-            <div class="col-md-1">
-                <label for="familyAge${memberIndex}" class="form-label">Age</label>
-                <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge${memberIndex}" readonly required>
-            </div>
-            <div class="col">
-                <label for="familyBirthplace${memberIndex}" class="form-label">Family Birthplace</label>
-                <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace${memberIndex}" placeholder="Enter birthplace" required>
-            </div>
-            <div class="col mt-4">
-                <button type="button" class="btn btn-danger remove-member">Remove</button>
-            </div>
-        </div>
-    `);
     
-        // Add event listener for birthdate change to calculate age
-    const birthdateField = document.getElementById(`familyBirthdate${memberIndex}`);
-    const ageField = document.getElementById(`familyAge${memberIndex}`);
-    birthdateField.addEventListener('change', function() {
-        calculateAge(this.value, ageField);
-    });
-});
-
-// Remove family member (moved outside of addFamilyMember)
-$(document).on('click', '.remove-member', function() {
-    $(this).closest('.family-member').remove();
-});
-
-// Main DOB listener (moved outside of addFamilyMember)
-document.getElementById('dob').addEventListener('change', function() {
-    calculateAge(this.value, document.getElementById('age'));
-});
-
-
-</script>
+    // Helper function to calculate age
+    function calculateAgeValue(birthDate) {
+        const dob = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDifference = today.getMonth() - dob.getMonth();
+        
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        
+        return age;
+    }
+    </script>

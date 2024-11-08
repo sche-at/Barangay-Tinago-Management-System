@@ -4,18 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Immunize extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $table = 'immunizes'; // Optional if the table name is the plural form of the model name
+    protected $table = 'immunizations';
 
     protected $fillable = [
         'vaccine', 
         'age', 
         'dosage',
         'venue',
-        'notes'
+        'notes',
+        'date',
+        'time'
     ];
 }

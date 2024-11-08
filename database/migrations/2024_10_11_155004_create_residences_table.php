@@ -15,18 +15,21 @@ return new class extends Migration
     {
         Schema::create('residences', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
+            $table->string('first_name');
+            $table->string('middle_name')->nullable();
+            $table->string('last_name');
+            $table->string('suffix')->nullable();
             $table->string('sex');
             $table->date('date_of_birth');
-            $table->unsignedInteger('age');
+            $table->integer('age')->nullable();
             $table->string('civil_status');
             $table->unsignedInteger('purok');
             $table->string('address');
+            $table->string('place_of_birth')->nullable();
             $table->string('educational_level');
             $table->string('occupation');
             $table->string('employment_status');
             $table->string('contact_number');
-            // Move timestamps to the end
             $table->timestamps();
         });
     }

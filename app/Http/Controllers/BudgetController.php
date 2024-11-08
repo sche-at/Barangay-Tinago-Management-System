@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Budget;
 use App\Models\BudgetDetailsValue;
 use App\Models\BudgetsDetails;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -42,31 +45,115 @@ class BudgetController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(Request $request)
+    // {
+    //      try{
+    //     $request->validate([
+    //         'title_plan' => 'required|string|max:255',
+    //         'trans_id' => 'required|array',
+    //         'trans_details' => 'required|array',
+    //         'trans_amt' => 'required|array'
+    //     ]);
+
+    //     $request->validate([
+    //         'title_plan' => 'required|string|max:255',
+    //         'trans_id' => 'required|array',
+    //         'trans_details' => 'required|array',
+    //         'trans_amt' => 'required|array|min:1',
+    //         'trans_amt.*' => 'required|numeric|min:0'
+    //     ]);
+
+    //     // Create a new Blotter entry
+    //     $budget = new Budget();
+    //     $budget->title_plan = $request->title_plan;
+    //     $budget->save();
+
+    //     // Loop through each transaction detail and save them
+    //     foreach ($request->trans_id as $index => $transId) {
+    //         $budgetDetailValue = new BudgetDetailsValue(); // Assuming BudgetDetailsValue is the model name
+    //         $budgetDetailValue->budget_header_id = $budget->id; // Link to the main budget entry
+    //         $budgetDetailValue->budget_details_id = $transId; // Detail type from `trans_id[]`
+    //         $budgetDetailValue->details_value = $request->trans_details[$index];
+    //         $budgetDetailValue->amount = $request->trans_amt[$index];
+    //         $budgetDetailValue->save();
+    //     }
+
+    //     return json_encode($request->all());
+    //    // return response()->json(['message' => 'Budget Plan Heading saved successfully!']); // Return success message
+    // }catch(Exception $exception){
+    //     return $exception;
+    // }
+    // }
+
+
     public function store(Request $request)
     {
-        $request->validate([
-            'title_plan' => 'required|string|max:255',
-            'trans_id' => 'required|array',
-            'trans_details' => 'required|array',
-            'trans_amt' => 'required|array'
-        ]);
+        try {
+            // Log the incoming request data
+            Log::info('Budget creation request data:', $request->all());
 
-        // Create a new Blotter entry
-        $budget = new Budget();
-        $budget->title_plan = $request->title_plan;
-        $budget->save();
+            // Validate the request
+            $request->validate([
+                'title_plan' => 'required|string|max:255',
+                'trans_id' => 'required|array',
+                'trans_details' => 'required|array',
+                'trans_amt' => 'required|array|min:1',
+                'trans_amt.*' => 'required|numeric|min:0'
+            ]);
 
-        // Loop through each transaction detail and save them
-        foreach ($request->trans_id as $index => $transId) {
-            $budgetDetailValue = new BudgetDetailsValue(); // Assuming BudgetDetailsValue is the model name
-            $budgetDetailValue->budget_header_id = $budget->id; // Link to the main budget entry
-            $budgetDetailValue->budget_details_id = $transId; // Detail type from `trans_id[]`
-            $budgetDetailValue->details_value = $request->trans_details[$index];
-            $budgetDetailValue->amount = $request->trans_amt[$index];
-            $budgetDetailValue->save();
+            // Start a database transaction
+            DB::beginTransaction();
+            
+            try {
+                // Create the main budget record
+                $budget = Budget::create([
+                    'title_plan' => $request->title_plan
+                ]);
+
+                Log::info('Created budget record:', ['budget_id' => $budget->id]);
+
+                // Process each transaction detail
+                foreach ($request->trans_id as $index => $budgetDetailsId) {
+                    $detailData = [
+                        'budget_header_id' => $budget->id,
+                        'budget_details_id' => $budgetDetailsId,
+                        'details_value' => $request->trans_details[$index],
+                        'amount' => $request->trans_amt[$index]
+                    ];
+
+                    Log::info('Creating budget detail:', $detailData);
+                    
+                    BudgetDetailsValue::create($detailData);
+                }
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Budget Plan created successfully',
+                    'budget_id' => $budget->id
+                ], 200);
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error('Error in transaction:', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            Log::error('Error creating budget:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating budget plan: ' . $e->getMessage()
+            ], 500);
         }
-
-        return response()->json(['message' => 'Budget Plan Heading saved successfully!']); // Return success message
     }
 
     /**
@@ -106,184 +193,40 @@ class BudgetController extends Controller
 
     public function export($id)
     {
-
         $budget = Budget::findOrFail($id);
-
-        // Create a new Spreadsheet object
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        
-        // Example of setting values in different cells
-        // Let's say we want 8 empty cells, and then the content in the 9th cell
-        
-        // Merge cells from A1 to G1
-        $sheet->mergeCells('A1:G1');
-        $sheet->setCellValue('A1', $budget->title_plan);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-
-        // Fetch all budget details (categories or sections)
         $budgetDetails = BudgetsDetails::all();
-
-        $budgetDetailsCounter = 3; // Start row for budget details sections
+        $grandTotal = 0;
+        
+        // Get current date information
+        $currentDate = now();
+        $data = [
+            'budget' => $budget,
+            'budgetDetails' => $budgetDetails,
+            'details' => [],
+            'grandTotal' => 0,
+            'day' => $currentDate->format('jS'),
+            'month' => $currentDate->format('F'),
+            'year' => $currentDate->format('Y')
+        ];
+    
+        // Process the data similar to your Excel generation
         foreach ($budgetDetails as $budgetDetail) {
-            // Set section title (e.g., 'Estimated Income')
-            $sheet->mergeCells('A' . $budgetDetailsCounter . ':H' . $budgetDetailsCounter);
-            $sheet->setCellValue('A' . $budgetDetailsCounter, $budgetDetail->budget_details);
-            $sheet->getStyle('A' . $budgetDetailsCounter . ':I' . $budgetDetailsCounter)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-            // Fetch associated values for each section
             $budgetDetailsVals = BudgetDetailsValue::where('budget_header_id', $budget->id)
                 ->where('budget_details_id', $budgetDetail->id)
                 ->get();
-
-            // Adjust counters to start placing values directly below the section title
-            $budgetDetailsCounter++;
-            $budgetDetailsValCounter = $budgetDetailsCounter;
-            $index = 1;
-
-            // Populate each value within the section
-            foreach ($budgetDetailsVals as $budgetDetailsVal) {
-                $sheet->setCellValue('A' . $budgetDetailsValCounter, $index); // Row index (e.g., 1, 2, 3)
-                $sheet->mergeCells('B' . $budgetDetailsValCounter . ':H' . $budgetDetailsValCounter);
-                $sheet->setCellValue('B' . $budgetDetailsValCounter, $budgetDetailsVal->details_value); // Transaction details
-
-                $sheet->setCellValue('I' . $budgetDetailsValCounter, $budgetDetailsVal->amount); // Amount in Column I
-
-                // Apply border styles for the row
-                $sheet->getStyle('A' . $budgetDetailsValCounter . ':I' . $budgetDetailsValCounter)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-                // Move to the next row for the next detail
-                $budgetDetailsValCounter++;
-                $index++;
-            }
-
-            // Update the main counter to continue after the last detail in the current section
-            $budgetDetailsCounter = $budgetDetailsValCounter + 1;
+    
+            $sectionTotal = $budgetDetailsVals->sum('amount');
+            $grandTotal += $sectionTotal;
+    
+            $data['details'][] = [
+                'title' => $budgetDetail->budget_details,
+                'values' => $budgetDetailsVals,
+                'sectionTotal' => $sectionTotal
+            ];
         }
-
-        // After populating all sections and details, set the final total row
-        $totalRow = $budgetDetailsCounter; // Set the final row number after all sections
-
-        // Merge cells for the Total label
-        $sheet->mergeCells("A{$totalRow}:H{$totalRow}");
-        $sheet->setCellValue("A{$totalRow}", 'Grand Total');
-        $sheet->getStyle("A{$totalRow}:H{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle("A{$totalRow}:H{$totalRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // Set the formula to sum up all amounts in the I column
-        $sheet->setCellValue("I{$totalRow}", "=SUM(I4:I" . ($totalRow - 1) . ")"); // Adjust range as needed
-        $sheet->getStyle("I{$totalRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        $sheet->getStyle("I{$totalRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Apply bold style to the Grand Total row
-        $sheet->getStyle("A{$totalRow}:I{$totalRow}")->getFont()->setBold(true);
-        // // Set other cells as needed
-        // $sheet->mergeCells('A3:H3');
-        // $sheet->setCellValue('A3', 'Estimated Income');
-        // $sheet->getStyle('A3:H3')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        // $sheet->setCellValue('I3', 'Amount');
-        // $sheet->getStyle('I3')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // // For loop for Estimate Income
-        // $estimateIncome = 1;
-        // for($x=4;$x<=13;$x++){
-        //     $sheet->mergeCells('B'.$x.':H'.$x);
-        //     $sheet->setCellValue('A'.$x, $estimateIncome);
-        //     $sheet->getStyle('A'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle('B'.$x.':I'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $estimateIncome++;
-        // }
-        // $sheet->mergeCells('A14:H14');
-        // $sheet->setCellValue('A14', 'NET AVAILABLE RESOURCES FOR APPROPRIATION  TOTAL');
-        // $sheet->setCellValue('I14', '=SUM(I4:I13)');
-        // $sheet->getStyle('A14:I14')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // // For Expendetures
-        // $sheet->mergeCells('A16:I16');
-        // $sheet->setCellValue('A16', 'EXPENDITURES:');
-        // $sheet->getStyle('A16:I16')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // $sheet->setCellValue('A17', 'a.');
-        // $sheet->mergeCells('B17:H17');
-        // $sheet->setCellValue('B17', 'CURRENT OPERATING EXPENDITURES');
-        // $sheet->setCellValue('I17', 'Amount');
-        // $sheet->getStyle('A17:I17')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        // $expendetures = 1;
-        // for($x=18;$x<=27;$x++){
-        //     $sheet->mergeCells('B'.$x.':H'.$x);
-        //     $sheet->setCellValue('A'.$x, $expendetures);
-        //     $sheet->getStyle('A'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle('B'.$x.':I'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $expendetures++;
-        // }
-        // $sheet->mergeCells('A28:H28');
-        // $sheet->setCellValue('A28', 'NET AVAILABLE RESOURCES FOR CY 2023 TOTAL');
-        // $sheet->setCellValue('I28', '=SUM(I18:I27)');
-        // $sheet->getStyle('A28:I28')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // // For MAINTENANCE AND OTHER OPERATING EXPENSES
-        // $sheet->mergeCells('A29:I29');
-        // $sheet->setCellValue('A29', 'MAINTENANCE AND OTHER OPERATING EXPENSES:');
-        // $sheet->setCellValue('I29', 'Amount');
-        // $sheet->getStyle('A29:I29')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        // $expenses = 1;
-        // for($x=30;$x<=53;$x++){
-        //     $sheet->mergeCells('B'.$x.':H'.$x);
-        //     $sheet->setCellValue('A'.$x, $expenses);
-        //     $sheet->getStyle('A'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle('B'.$x.':I'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $expenses++;
-        // }
-        // $sheet->mergeCells('A54:I54');
-        // $sheet->setCellValue('A54', 'CULTURAL ACTIVITIES AND OTHER RELATED ACTIVITIES');
-        // $sheet->getStyle('A54:I54')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        // $activities = 25;
-        // for($x=55;$x<=60;$x++){
-        //     $sheet->mergeCells('B'.$x.':H'.$x);
-        //     $sheet->setCellValue('A'.$x, $activities);
-        //     $sheet->getStyle('A'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle('B'.$x.':I'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $activities++;
-        // }
-        // $sheet->mergeCells('A61:H61');
-        // $sheet->setCellValue('A61', 'TOTAL');
-        // $sheet->setCellValue('I61', '=SUM(I30:I60)');
-        // $sheet->getStyle('A61:I61')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // // For NON-OFFICE EXPENDITURES
-        // $sheet->mergeCells('A63:I63');
-        // $sheet->setCellValue('A63', 'NON-OFFICE EXPENDITURES');
-        // $sheet->getStyle('A63:I63')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        // $nonOffices = 1;
-        // for($x=64;$x<=68;$x++){
-        //     $sheet->mergeCells('B'.$x.':H'.$x);
-        //     $sheet->setCellValue('A'.$x, $nonOffices);
-        //     $sheet->getStyle('A'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $sheet->getStyle('B'.$x.':I'.$x)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-        //     $nonOffices++;
-        // }
-        // $sheet->mergeCells('A69:H69');
-        // $sheet->setCellValue('A69', 'TOTAL');
-        // $sheet->setCellValue('I69', '=SUM(I64:I68)');
-        // $sheet->getStyle('A69:I69')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // // For Grand Total
-        // $sheet->mergeCells('A80:H80');
-        // $sheet->setCellValue('A80', 'GRAND TOTAL');
-        // $sheet->setCellValue('I80', '=SUM(I14:I28:I61:I69)');
-        // $sheet->getStyle('A80:I80')->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-
-        // Save as a .xlsx file
-        $writer = new Xlsx($spreadsheet);
-        
-        // Streamed response to download the file directly
-        return new StreamedResponse(function() use ($writer) {
-            // Send the file to the browser as a download
-            $writer->save('php://output');
-        }, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="export.xlsx"',
-        ]);
+    
+        $data['grandTotal'] = $grandTotal;
+    
+        return view('budgets.print-excel', $data);
     }
 }

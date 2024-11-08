@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('responding_officer')->nullable();
             $table->string('status')->nullable();
             $table->text('description'); // Use text type for longer descriptions
+            $table->date('incident_date')->nullable(); // Added new field for incident date
+            $table->time('incident_time')->nullable(); // Added new field for incident time
             $table->timestamps();
         });
     }
