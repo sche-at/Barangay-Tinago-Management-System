@@ -1,19 +1,20 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ResidenceController;
-use App\Http\Controllers\BlooterController;
-use App\Http\Controllers\BudgetController;
-use App\Http\Controllers\CommentController;
+use App\Models\Budget;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\BlooterController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ImmunizeController;
 use App\Http\Controllers\PrenatalController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ResidenceController;
 use App\Http\Controllers\TransactionsController;
-use App\Http\Controllers\UserController;
-use App\Models\Budget;
 use Illuminate\Database\Events\TransactionCommitted;
-use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -144,8 +145,24 @@ Route::get('/residences/archived/{id}', [ResidenceController::class, 'showArchiv
     Route::middleware(['auth'])->group(function () {
         Route::get('/transaction-report', [TransactionsController::class, 'generateReport'])
             ->name('transaction.report');
-    });
 
+            Route::post('/settings/update-price', [SettingController::class, 'updatePrice'])->name('settings.updatePrice');
+            // Route::get('/transactions/create', [TransactionsController::class, 'create'])->name('transactions.create');
+            Route::post('/transactions', [TransactionsController::class, 'store'])->name('transactions.store');
+            Route::get('/transactions/create', [TransactionsController::class, 'create'])->name('transactions.create');
+            Route::post('/transactions/{id}/add-receipt', [TransactionsController::class, 'addReceipt'])->name('transactions.addReceipt');
+            Route::patch('/transactions/{id}/payment-status', [TransactionsController::class, 'updatePaymentStatus'])
+            ->name('transactions.updatePaymentStatus');
+        
+            Route::get('/residenceview', [ResidenceController::class, 'residenceview'])->name('residence.view');
+            Route::post('/update-purok', [TransactionsController::class, 'updatePurok'])->name('updatePurok'); 
+            Route::get('/residences', [ResidenceController::class, 'index'])->name('residences.index');
+
+            Route::get('residence/purok', [ResidenceController::class, 'purok'])->name('residence.purok');
+            Route::post('/transactions/store', [TransactionsController::class, 'store'])->middleware('auth');
+            Route::delete('/residence/{id}', [ResidenceController::class, 'destroy'])->name('residence.destroy');
+
+    });
 });
 
 require __DIR__.'/auth.php';

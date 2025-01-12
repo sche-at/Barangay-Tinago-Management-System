@@ -106,15 +106,6 @@
         margin: 1.5rem 0;
         border: 1px solid #bae6fd;
     }
-    .price-tag {
-        display: inline-block;
-        background: #dbeafe;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 500;
-        color: #1e40af;
-        margin-left: 0.5rem;
-    }
     .alert {
         border-radius: 8px;
         padding: 1rem;
@@ -134,6 +125,21 @@
         text-align: center;
     }
 </style>
+@php
+$currentPriceSetting = \App\Models\Setting::where('key', 'request_price')->first();
+$currentPrice = $currentPriceSetting ? $currentPriceSetting->value : 50;
+
+// Get user's submitted document types
+$submittedDocuments = \App\Models\Transactions::where('user_id', auth()->id())
+    ->whereIn('status', ['Not Ready', 'Processing', 'Ready for Pickup', 'pending', 'processing', 'for_pickup'])
+    ->pluck('trans_type')
+    ->toArray();
+
+// Check for pending requests
+$pendingRequest = \App\Models\Transactions::where('user_id', auth()->id())
+    ->whereIn('status', ['Not Ready', 'Processing', 'Ready for Pickup'])
+    ->first();
+@endphp
 
 <div id="layoutSidenav">
     <div id="layoutSidenav_content">
@@ -155,13 +161,25 @@
                         <div class="request-group">
                             <div class="mb-3">
                                 <label class="form-label">Request Type</label>
-                                <select class="form-control request-type" name="request_type[]" required>
+                                <select class="form-control request-type" name="trans_type[]" required>
                                     <option value="">Select Request Type</option>
-                                    <option value="Barangay Clearance">Barangay Clearance (₱50)</option>
-                                    <option value="Barangay Certificate">Barangay Certificate (₱50)</option>
-                                    <option value="Lot Clearance">Lot Clearance (₱50)</option>
-                                    <option value="Certificate of Indigency">Certificate of Indigency (₱50)</option>
-                                    <option value="Others">Others (₱50)</option>
+                                    <option value="Barangay Clearance" 
+                                        {{ in_array('Barangay Clearance', $submittedDocuments) ? 'disabled' : '' }}>
+                                        Barangay Clearance (₱{{ $currentPrice }})
+                                    </option>
+                                    <option value="Barangay Certificate" 
+                                        {{ in_array('Barangay Certificate', $submittedDocuments) ? 'disabled' : '' }}>
+                                        Barangay Certificate (₱{{ $currentPrice }})
+                                    </option>
+                                    <option value="Lot Clearance" 
+                                        {{ in_array('Lot Clearance', $submittedDocuments) ? 'disabled' : '' }}>
+                                        Lot Clearance (₱{{ $currentPrice }})
+                                    </option>
+                                    <option value="Certificate of Indigency" 
+                                        {{ in_array('Certificate of Indigency', $submittedDocuments) ? 'disabled' : '' }}>
+                                        Certificate of Indigency (₱{{ $currentPrice }})
+                                    </option>
+                                    <option value="Others">Others (₱{{ $currentPrice }})</option>
                                 </select>
                             </div>
                             <div class="mb-3">
@@ -175,19 +193,24 @@
                         <h3 class="font-semibold text-lg mb-2">Total Payable Amount: <span id="displayTotal" class="text-blue-600">₱0.00</span></h3>
                     </div>
 
-                    <button type="button" class="btn btn-secondary mb-3" id="add-request" disabled>
+                    <button type="button" class="btn btn-secondary mb-3" id="add-request">
                         <i class="fas fa-plus mr-1"></i> Add Another Request
                     </button>
 
                     <div class="mb-3">
                         <label class="form-label">Purok</label>
-                        <select class="form-control" name="purok" required>
+                        <select class="form-control" name="purok" disabled>
                             <option value="">Select Purok</option>
-                            @for ($x=1; $x<=7; $x++)
-                                <option>Purok {{ $x }}</option>
+                            @for ($x = 1; $x <= 7; $x++)
+                                <option value="{{ $x }}" {{ $x == auth()->user()->purok ? 'selected' : '' }}>Purok {{ $x }}</option>
                             @endfor
                         </select>
+                        <!-- Hidden input to ensure the value gets submitted -->
+                        <input type="hidden" name="purok" value="{{ auth()->user()->purok }}">
                     </div>
+                    
+                    
+                    
 
                     <div class="mb-3">
                         <label class="form-label">Mode of Payment</label>
@@ -197,8 +220,15 @@
                             <option value="GCash">GCash</option>
                         </select>
                         <div id="gcash_upload_section" class="mt-3" style="display: none;">
-                            <label class="form-label">Upload GCash Payment Reciept</label>
-                            <input type="file" class="form-control" id="gcash_file" name="gcash_file">
+                            <div class="mb-3">
+                                <label class="form-label">GCash Reference Number</label>
+                                <input type="text" id="gcash_reference" name="gcash_reference" maxlength="13" class="form-control" required oninput="this.value=this.value.replace(/\D/g,'')">
+
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Upload GCash Payment Receipt</label>
+                                <input type="file" class="form-control" id="gcash_file" name="gcash_file">
+                            </div>
                         </div>
                     </div>
 
@@ -209,35 +239,38 @@
     </div>
 </div>
 
-    @include('templates.footer')
-
-
-
+@include('templates.footer')
 
 <script>
-    const requestOptions = [
-        { value: "Barangay Clearance", text: "Barangay Clearance (₱50)", price: 50 },
-        { value: "Barangay Certificate", text: "Barangay Certificate (₱50)", price: 50 },
-        { value: "Lot Clearance", text: "Lot Clearance (₱50)", price: 50 },
-        { value: "Certificate of Indigency", text: "Certificate of Indigency (₱50)", price: 50 },
-        { value: "Others", text: "Others (₱50)", price: 50 }
-    ];
+    const requestPrice = {{ $currentPrice }}; // Get the current price from the controller
 
     function updateTotal() {
         const selectedRequests = document.querySelectorAll('.request-type');
         let total = 0;
         selectedRequests.forEach(select => {
             if (select.value) {
-                total += 50; // Each request costs ₱50
+                total += requestPrice; // Use the dynamic price
             }
         });
         document.getElementById('displayTotal').textContent = `₱${total.toFixed(2)}`;
-        document.getElementById('totalPayable').value = 50;
+        document.getElementById('totalPayable').value = total; // Update total payable
     }
 
     document.getElementById('mode_payment').addEventListener('change', function() {
         const gcashUploadSection = document.getElementById('gcash_upload_section');
-        gcashUploadSection.style.display = this.value === 'GCash' ? 'block' : 'none';
+        const gcashReference = document.getElementById('gcash_reference');
+        const gcashFile = document.getElementById('gcash_file');
+
+        if (this.value === 'GCash') {
+            gcashUploadSection.style.display = 'block';
+            gcashReference.required = true;
+            gcashFile.required = true;
+        } else {
+            gcashUploadSection.style.display = 'none';
+            gcashReference.required = false;
+            gcashFile.required = false;
+            gcashReference.value = ''; // Clear the reference number
+        }
     });
 
     document.getElementById('add-request').addEventListener('click', function() {
@@ -249,8 +282,13 @@
         newRequestGroup.innerHTML = `
             <div class="mb-3">
                 <label class="form-label">Request Type</label>
-                <select class="form-control request-type" name="request_type[]" required>
+                <select class="form-control request-type" name="trans_type[]" required>
                     <option value="">Select Request Type</option>
+                    <option value="Barangay Clearance">Barangay Clearance (₱${requestPrice})</option>
+                    <option value="Barangay Certificate">Barangay Certificate (₱${requestPrice})</option>
+                    <option value="Lot Clearance">Lot Clearance (₱${requestPrice})</option>
+                    <option value="Certificate of Indigency">Certificate of Indigency (₱${requestPrice})</option>
+                    <option value="Others">Others (₱${requestPrice})</option>
                 </select>
                 <span class="remove-request" onclick="removeRequest(this)">
                     <i class="fas fa-trash-alt mr-1"></i> Remove Request
@@ -263,54 +301,19 @@
         `;
         
         requestContainer.appendChild(newRequestGroup);
-        updateRequestTypeOptions();
         updateTotal();
     });
 
     document.addEventListener('change', function(e) {
         if (e.target.classList.contains('request-type')) {
-            updateRequestTypeOptions();
-            validateAddRequestButton();
             updateTotal();
         }
     });
 
-    function updateRequestTypeOptions() {
-        const selectedValues = Array.from(document.querySelectorAll('.request-type'))
-            .map(select => select.value)
-            .filter(value => value !== "");
-        
-        document.querySelectorAll('.request-type').forEach(select => {
-            const currentValue = select.value;
-            select.innerHTML = `<option value="">Select Request Type</option>`;
-            
-            requestOptions.forEach(option => {
-                if (!selectedValues.includes(option.value) || option.value === currentValue) {
-                    const opt = document.createElement('option');
-                    opt.value = option.value;
-                    opt.text = option.text;
-                    opt.selected = option.value === currentValue;
-                    select.appendChild(opt);
-                }
-            });
-        });
-    }
-
-    function validateAddRequestButton() {
-        const allSelected = Array.from(document.querySelectorAll('.request-type')).every(select => select.value !== "");
-        document.getElementById('add-request').disabled = !allSelected;
-    }
-
     function removeRequest(element) {
         element.closest('.request-group').remove();
-        updateRequestTypeOptions();
-        validateAddRequestButton();
         updateTotal();
     }
 
-    updateRequestTypeOptions();
-    validateAddRequestButton();
     updateTotal();
-
-    
 </script>

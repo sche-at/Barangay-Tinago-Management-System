@@ -20,9 +20,10 @@ class UserController extends Controller
             'username' => 'required|string|max:255',
             'email' => 'required|string|max:255',
             'userType' => 'required|string|max:255',
-            'contact' => 'required|string|max:255'
+            'contact' => 'required|string|max:255',
+            'purok' => 'required|integer|min:0',
         ]);
-
+    
         $user = new User();
         $user->name = $request->fullName;
         $user->username = $request->username;
@@ -30,10 +31,12 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make('btms@2024');
         $user->user_type = $request->userType;
+        $user->purok = $request->purok; // Save the purok
         $user->save();
-
-        return response()->json(['message' => 'User saved successfully!']); // Return success message
+    
+        return response()->json(['message' => 'User saved successfully!']);
     }
+    
 
     public function destroy($id)
     {

@@ -35,6 +35,10 @@
                                     <option value="III">III (The Third)</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="generatedEmail" class="form-label">Generated Email</label>
+                                <input type="text" name="email" class="form-control" id="generatedEmail" placeholder="Generated email" readonly>
+                            </div>
                         </div>
                         
 
@@ -168,7 +172,15 @@
                                     </select>
                                 </div>
                            
-
+                                <div class="col-md-3">
+                                    <label for="sex" class="form-label">Sex</label>
+                                    <select name="sex" class="form-select" id="sex" required>
+                                        <option disabled selected value=""> Select your sex</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Prefer not to say</option>
+                                    </select>
+                                </div>
                                 <div class="col">
                                     <label for="familyRelationship1" class="form-label">Family Relationship</label>
                                     <select name="family_relationships[]" class="form-control" id="familyRelationship1" required>
@@ -285,6 +297,15 @@
                         <option value="III">III (The Third)</option>
                     </select>
                 </div>
+                  <div class="col-md-3">
+                <label for="familySex${memberCount}" class="form-label">Sex</label>
+                <select name="family_sexes[]" class="form-select" id="familySex${memberCount}" required>
+                    <option disabled selected value="">Select your sex</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Prefer not to say</option>
+                </select>
+            </div>
                 <div class="col">
                     <label for="familyRelationship${memberCount}" class="form-label">Family Relationship</label>
                     <select name="family_relationships[]" class="form-select" id="familyRelationship${memberCount}" required>
@@ -388,4 +409,17 @@
             document.getElementById('age').value = age;
         });
     }
+    function generateEmail() {
+    const firstName = document.getElementById('firstName').value.trim().toLowerCase().replace(/\s+/g, '');
+    const middleName = document.getElementById('middleName').value.trim().toLowerCase().replace(/\s+/g, '');
+    const lastName = document.getElementById('lastName').value.trim().toLowerCase().replace(/\s+/g, '');
+
+    let email = `${firstName}${middleName ? middleName + '.' : ''}${lastName}@btms.com`;
+    document.getElementById('generatedEmail').value = email;
+}
+
+// Add event listeners to generate email on input change
+document.getElementById('firstName').addEventListener('input', generateEmail);
+document.getElementById('middleName').addEventListener('input', generateEmail);
+document.getElementById('lastName').addEventListener('input', generateEmail);
 </script>

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
+
 
 class FamilyMember extends Model
 {
@@ -19,10 +21,17 @@ class FamilyMember extends Model
         'birthdate',
         'birthplace',
         'age',
+        'purok',
+        'contact_number',
+        'sex'
     ];
 
     public function residence()
     {
         return $this->belongsTo(Residence::class, 'residence_id');
     }
+    public function getAgeAttribute()
+{
+    return Carbon::parse($this->birthdate)->age;
+}
 }

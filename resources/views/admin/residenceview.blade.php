@@ -9,37 +9,118 @@
                         <i class="fas fa-table me-1"></i>
                         Residence List
                     </div>
-                    <button class="btn btn-secondary me-2" onclick="window.location.href='{{ route('residences.archived') }}'"><i class="fas fa-archive me-1"></i>View Archived</button>
-                   
+                    <button class="btn btn-secondary me-2" onclick="window.location.href='{{ route('residences.archived') }}'">
+                        <i class="fas fa-archive me-1"></i>View Archived
+                    </button>
                 </div>
+                
+                <!-- Filtering Section -->
+                <div class="card-header">
+                    <div class="row">
+                        
+                        <div class="col-md-3">
+                            <label for="nameFilter" class="form-label">Filter by Name</label>
+                            <input type="text" id="nameFilter" class="form-control" placeholder="Enter name">
+                        </div>
+                        
+                        <form id="filterForm" method="GET" action="{{ route('residence.view') }}">
+                            <label for="purokFilter">Filter by Purok</label>
+                            <select id="purokFilter" name="purok" class="form-select">
+                                <option value="">All Puroks</option>
+                                <option value="1">Purok 1</option>
+                                <option value="2">Purok 2</option>
+                                <option value="3">Purok 3</option>
+                                <option value="4">Purok 4</option>
+                                <option value="5">Purok 5</option>
+                                <option value="6">Purok 6</option>
+                                <option value="7">Purok 7</option>
+                            </select>
+                            {{-- <button type="submit" class="btn btn-primary">Filter</button> --}}
+                        </form>
+
+                        <div class="col-md-3">
+                            <label for="genderFilter" class="form-label">Filter by Gender</label>
+                            <select id="genderFilter" class="form-select">
+                                <option value="">All Genders</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ageMinFilter" class="form-label">Minimum Age</label>
+                            <input type="number" id="ageMinFilter" class="form-control" min="0" max="120" placeholder="Min Age">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ageMaxFilter" class="form-label">Maximum Age</label>
+                            <input type="number" id="ageMaxFilter" class="form-control" min="0" max="120" placeholder="Max Age">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-body">
-                    <table id="datatablesSimple" width="100%">
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button id="printFilteredDataBtn" class="btn btn-success">Print Filtered Data</button>
+                        </div>
+                    </div>
+                    <table id="datatablesSimple1" width="100%">
                         <thead>
                             <tr>
                                 <th>Full Name</th>
                                 <th>Contact Number</th>
                                 <th>Purok</th>
+                                <th>Gender</th>
+                                <th>Age</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach($residences as $res)
-                        <tr>
-                            <td>{{ $res->first_name }} {{ $res->middle_name ? $res->middle_name . ' ' : '' }}{{ $res->last_name }}{{ $res->suffix != 'N/A' ? ' ' . $res->suffix : '' }}</td>
-                            <td>{{ $res->contact_number }}</td>
-                            <td>{{ $res->purok }}</td>
-                            <td>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteResidence({{ $res->id }})">Delete</button>
-                                        <button class="btn btn-primary btn-sm" data-id="{{ $res->id }}" onclick="showResidenceDetails({{ $res->id }})" data-bs-toggle="modal" data-bs-target="#ResidentModal">View Details</button>
-                                    </td>
-                                </tr>
-                         @endforeach
+                            @foreach($residences as $res)
+                            <!-- Head of Family -->
+                            <tr data-purok="{{ $res->purok }}" 
+                                data-gender="{{ $res->sex }}" 
+                                data-age="{{ $res->age }}">
+                                <td>{{ $res->first_name }} {{ $res->middle_name ? $res->middle_name . ' ' : '' }}{{ $res->last_name }}{{ $res->suffix != 'N/A' ? ' ' . $res->suffix : '' }}</td>
+                                <td>{{ $res->contact_number }}</td>
+                                <td>{{ $res->purok }}</td>
+                                <td>{{ $res->sex }}</td>
+                                <td>{{ $res->age }}</td>
+                                <td>
+                                    <form id="delete-form-{{ $res->id }}" action="{{ route('residence.destroy', $res->id) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Archived</button>
+                                    </form>
+                                    <button class="btn btn-primary btn-sm" data-id="{{ $res->id }}" onclick="showResidenceDetails({{ $res->id }})" data-bs-toggle="modal" data-bs-target="#ResidentModal">View Details</button>
+                                </td>
+                                
+                            </tr>
+                            
+                            <!-- Family Members (Under the Head of Family) -->
+@foreach($res->familyMembers as $familyMember)
+<tr class="family-member" data-purok="{{ $res->purok }}" 
+    data-gender="{{ $familyMember->sex }}" 
+    data-age="{{ $familyMember->age }}">
+    <td>{{ $familyMember->first_name }} {{ $familyMember->middle_name ? $familyMember->middle_name . ' ' : '' }}{{ $familyMember->last_name }}{{ $familyMember->suffix != 'N/A' ? ' ' . $familyMember->suffix : '' }}</td>
+    <td>{{ $familyMember->contact_number }}</td>
+    <td>{{ $familyMember->purok }}</td>
+    <td>{{ $familyMember->sex }}</td>
+    <td>{{ $familyMember->age }}</td>
+    <td></td>
+</tr>
+@endforeach
+                            
+                        @endforeach
+                        
                         </tbody>
                     </table>
+            
                 </div>
             </div>
         </div>
     </main>
+
 
     <div class="modal fade" id="ResidentModal" tabindex="-1" aria-labelledby="ResidentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -177,13 +258,13 @@
                         <!-- Family Members Section -->
                         <div id="familyMembers">
                             <h5>Family Members</h5>
-                            <div class="row mb-3 family-member">
+                            <div class="row mb-3">
                                 <div class="col-md-3">
                                     <label for="familyFirstName1" class="form-label">First Name</label>
                                     <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName1" placeholder="First name" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="familyMiddleName1" class="form-label">Middle Name (ifapplicabled)</label>
+                                    <label for="familyMiddleName1" class="form-label">Middle Name (if applicable)</label>
                                     <input type="text" name="family_middle_names[]" class="form-control" id="familyMiddleName1" placeholder="Middle name">
                                 </div>
                                 <div class="col-md-3">
@@ -201,9 +282,51 @@
                                         <option value="III">III (The Third)</option>
                                     </select>
                                 </div>
+                           
+                                <div class="col-md-3">
+                                    <label for="sex" class="form-label">Sex</label>
+                                    <select name="sex" class="form-select" id="sex" required>
+                                        <option disabled selected value=""> Select your sex</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Prefer not to say</option>
+                                    </select>
+                                </div>
                                 <div class="col">
                                     <label for="familyRelationship1" class="form-label">Family Relationship</label>
                                     <select name="family_relationships[]" class="form-control" id="familyRelationship1" required>
+                                        <option disabled selected value="">Select Family Relationship</option>
+                                        <option value="father">Father</option>
+                                        <option value="mother">Mother</option>
+                                        <option value="son">Son</option>
+                                        <option value="daugther">Daugther</option>
+                                        <option value="brother">Brother</option>
+                                        <option value="sister">Sister</option>
+                                        <option value="grandmother">Grandmother</option>
+                                        <option value="grandfather">Grandfather</option>
+                                        <option value="grandson">Grandson</option>
+                                        <option value="granddaugther">Granddaugther</option>
+                                        <option value="aunt">Aunt</option>
+                                        <option value="uncle">Uncle</option>
+                                        <option value="nephew">Nephew</option>
+                                        <option value="niece">Niece</option>
+                                        <option value="cousin">Cousin</option>
+                                        <option value="husband">Husband</option>
+                                        <option value="wife">Wife</option>
+                                        <option value="father-in-law">Father-in-Law</option>
+                                        <option value="mother-in-law">Mother-in-Law</option>
+                                        <option value="son-in-law">Son-in-law</option>
+                                        <option value="daugther-in-law">Daugther-in-law</option>
+                                        <option value="brother-in-law">Brother-in-law</option>
+                                        <option value="sister-in-law">Sister-in-law</option>
+                                        <option value="stepfather">Stepfather</option>
+                                        <option value="Stepmother">Stepmother</option>
+                                        <option value="stepson">Stepson</option>
+                                        <option value="stepdaugther">Stepdaugther</option>
+                                        <option value="half-brother">Half-brother</option>
+                                        <option value="half-sister">Half-sister</option>
+                                     </select>
+                                </div>
                                 <div class="col-md-2">
                                     <label for="familyBirthdate1" class="form-label">Birthdate</label>
                                     <input type="date" name="family_birthdates[]" class="form-control family-birthdate" id="familyBirthdate1" required>
@@ -212,6 +335,7 @@
                                     <label for="familyAge1" class="form-label">Age</label>
                                     <input type="number" name="family_ages[]" class="form-control family-age" id="familyAge1" readonly required>
                                 </div>
+                                
                                 <div class="col">
                                     <label for="familyBirthplace1" class="form-label">Family Birthplace</label>
                                     <input type="text" name="family_birthplaces[]" class="form-control" id="familyBirthplace1" placeholder="Enter birthplace" required>
@@ -223,7 +347,7 @@
                         </div>
 
                         <button type="button" class="btn btn-primary" id="addFamilyMember">Add Family Member</button>
-                    </form>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -291,6 +415,7 @@ function calculateAge(birthDate, ageField) {
 
 
                     familyMemberRow.append(`
+                     <h5>Family Members</h5>
                         <div class="col-md-3">
                             <label for="familyFirstName${index + 1}" class="form-label">First Name</label>
                             <input type="text" name="family_first_names[]" class="form-control" id="familyFirstName${index + 1}" value="${member.first_name}" required>
@@ -313,6 +438,15 @@ function calculateAge(birthDate, ageField) {
                                 <option value="III" ${member.suffix === 'III' ? 'selected' : ''}>III (The Third)</option>
                             </select>
                         </div>
+                        <div class="col-md-3">
+    <label for="familySex${index + 1}" class="form-label">Sex</label>
+    <select name="family_sexes[]" class="form-select" id="familySex${index + 1}">
+        <option value="male" ${member.sex === 'male' ? 'selected' : ''}>Male</option>
+        <option value="female" ${member.sex === 'female' ? 'selected' : ''}>Female</option>
+        <option value="other" ${member.sex === 'other' ? 'selected' : ''}>Prefer not to say</option>
+    </select>
+</div>
+
                         <div class="col-md-3">
                             <label for="familyRelationship${index + 1}" class="form-label">Family Relationship</label>
                             <select name="family_relationships[]" class="form-select" id="familyRelationship${index + 1}" required>
@@ -548,5 +682,230 @@ document.getElementById('dob').addEventListener('change', function() {
     calculateAge(this.value, document.getElementById('age'));
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Get filter elements
+    const nameFilter = document.getElementById('nameFilter');
+    const purokFilter = document.getElementById('purokFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    const ageMinFilter = document.getElementById('ageMinFilter');
+    const ageMaxFilter = document.getElementById('ageMaxFilter');
+    const printFilteredDataBtn = document.getElementById('printFilteredDataBtn');
 
+    // Get all table rows
+    const rows = document.querySelectorAll('#datatablesSimple1 tbody tr');
+    
+    // Function to apply filters
+    function applyFilters() {
+        rows.forEach(row => {
+            const fullName = row.cells[0].innerText.toLowerCase();  // Assuming Full Name is the first column
+            const purok = row.getAttribute('data-purok');
+            const gender = row.getAttribute('data-gender');
+            const age = parseInt(row.getAttribute('data-age'));
+            
+            // Check Name filter
+            const nameMatch = nameFilter.value === '' || fullName.includes(nameFilter.value.toLowerCase());
+            
+            // Check Purok filter
+            const purokMatch = purokFilter.value === '' || purok === purokFilter.value;
+            
+            // Check Gender filter
+            const genderMatch = genderFilter.value === '' || gender === genderFilter.value;
+            
+            // Check Age filters
+            const minAge = ageMinFilter.value ? parseInt(ageMinFilter.value) : 0;
+            const maxAge = ageMaxFilter.value ? parseInt(ageMaxFilter.value) : Infinity;
+            const ageMatch = age >= minAge && age <= maxAge;
+            
+            // Show/hide row based on filters
+            row.style.display = nameMatch && purokMatch && genderMatch && ageMatch ? '' : 'none';
+        });
+    }
+
+    // Add event listeners to filter inputs
+    nameFilter.addEventListener('input', applyFilters);
+    purokFilter.addEventListener('change', applyFilters);
+    genderFilter.addEventListener('change', applyFilters);
+    ageMinFilter.addEventListener('input', applyFilters);
+    ageMaxFilter.addEventListener('input', applyFilters);
+
+    // Print Filtered Data functionality
+    printFilteredDataBtn.addEventListener('click', function() {
+        // Create a new window for printing
+        const printWindow = window.open('', '_blank');
+        const currentDate = new Date().toLocaleDateString();
+
+        // Generate print content
+        let printHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Residence Report</title>
+                <style>
+                    body { font-family: Arial, sans-serif; }
+                    .report-container { width: 100%; max-width: 800px; margin: 0 auto; }
+                    .report-header { text-align: center; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                    table, th, td { border: 1px solid black; }
+                    th, td { padding: 8px; text-align: left; }
+                    .report-footer { margin-top: 20px; }
+                    .signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+                    .signature-block { width: 40%; text-align: center; }
+                    .signature-line { border-top: 1px solid black; margin-bottom: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    <div class="report-header">
+                        <h4 style="margin: 10px 0;">Republic of the Philippines</h4>
+                        <h4 style="margin: 10px 0;">Province of Bohol</h4>
+                        <h4 style="margin: 10px 0;">Municipality of Dauis</h4>
+                        <h3 style="margin: 15px 0;">OFFICE OF THE BARANGAY CAPTAIN</h3>
+                        <h2 style="margin: 20px 0;">RESIDENCE REPORT</h2>
+                        <p style="margin: 10px 0;">Date Generated: ${currentDate}</p>
+        `;
+
+        printHTML += `
+    ${purokFilter.value === '' ? '' : `<p style="margin: 10px 0;">Purok: ${purokFilter.value}</p>`}
+    ${genderFilter.value === '' ? '' : `<p style="margin: 10px 0;">Gender: ${genderFilter.value}</p>`}
+`;
+
+
+
+
+        let tableHeaders = `
+        </div>
+
+                    <table>
+                        <thead>
+                            
+    <tr>
+        <th>Full Name</th>
+        <th>Contact Number</th>
+        ${purokFilter.value !== '' ? '' : '<th>Purok</th>'} <!-- Show Purok only if filter is empty -->
+        ${genderFilter.value !== '' ? '' : '<th>Gender</th>'} <!-- Show Gender only if filter is empty -->
+        <th>Age</th>
+    </tr>
+`;
+
+printHTML += tableHeaders;
+
+
+        printHTML +=  ` </thead>
+                        <tbody>`;
+
+        // Collect and add only visible (filtered) rows
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                printHTML += `
+                     <tr>
+                <td>${row.cells[0].textContent}</td>
+                <td>${row.cells[1].textContent}</td>
+                ${purokFilter.value ? '' : `<td>${row.cells[2].textContent}</td>`}  <!-- Hide Purok if filtered -->
+                ${genderFilter.value ? '' : `<td>${row.cells[3].textContent}</td>`}  <!-- Hide Gender if filtered -->
+                <td>${row.cells[4].textContent}</td>
+            </tr>
+                `;
+            }
+        });
+
+        const filteredRowsCount = document.querySelectorAll('#datatablesSimple1 tbody tr:not([style*="display: none"])').length;
+
+        printHTML += `
+                        </tbody>
+                    </table>
+
+                    <div class="report-footer">
+                        <strong>Total Number of Residents: ${filteredRowsCount}</strong>
+                        
+                        <div class="signatures">
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <strong>Prepared by:</strong><br>
+                                Barangay Secretary
+                            </div>
+                            
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <strong>Certified Correct:</strong><br>
+                                Barangay Chairman
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        window.onafterprint = function() {
+                            window.close();
+                        }
+                    }
+                <\/script>
+            </body>
+            </html>
+        `;
+
+        // Write the content to the new window
+        printWindow.document.write(printHTML);
+        printWindow.document.close();
+    });
+});
+// document.getElementById('purokFilter').addEventListener('change', function() {
+//     const purok = this.value;
+//     let url = '{{ route('residence.view') }}';
+    
+//     if (purok !== '') {
+//         url += `?purok=${purok}`;
+//     }
+    
+//     fetch(url, {
+//         headers: {
+//             'X-Requested-With': 'XMLHttpRequest'
+//         }
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         // Debug log to see what data we're receiving
+//         console.log('Received data:', data);
+        
+//         if (data.residences) {
+//             updateResidenceTable(data.residences);
+//         } else {
+//             console.error('No residence data received');
+//         }
+//     })
+//     .catch(error => {
+//         console.error('Error:', error);
+//     });
+// });
+
+// function updateResidenceTable(residences) {
+//     const tableBody = document.querySelector('table tbody');
+//     tableBody.innerHTML = '';
+    
+//     // Debug log to see residences data
+//     console.log('Updating table with residences:', residences);
+    
+//     if (residences && residences.length > 0) {
+//         residences.forEach(residence => {
+//             // Debug log for each residence
+//             console.log('Processing residence:', residence);
+            
+//             const row = `
+//                 <tr>
+//                     <td>${residence.household_no || ''}</td>
+//                     <td>${residence.purok || ''}</td>
+//                     <td>${residence.family_members ? residence.family_members.map(member => member.name).join(', ') : ''}</td>
+//                     <!-- Add any other columns you need -->
+//                 </tr>
+//             `;
+//             tableBody.innerHTML += row;
+//         });
+//     } else {
+//         tableBody.innerHTML = `
+//             <tr>
+//                 <td colspan="3" class="text-center">No residences found</td>
+//             </tr>
+//         `;
+//     }
+// }
 </script>

@@ -205,6 +205,7 @@
                         <th>Total Payable</th>
                         <th>Payment Mode</th>
                         <th>Status</th>
+                        <th>Reference Number</th> <!-- Added Reference Number column -->
                         <th>Receipt</th>
                     </tr>
                 </thead>
@@ -227,7 +228,7 @@
                                     {{ $transaction->purpose }}
                                 @endif
                             </td>
-                            <td>{{ '₱ '.$transaction->totalPayable}}</td>
+                            <td>{{ '₱ '.$transaction->totalPayable }}</td>
                             <td>{{ $transaction->mode_payment }}</td>
                             <td>
                                 @if($status != 'Picked Up')
@@ -266,6 +267,9 @@
                                 @endif
                             </td>
                             <td>
+                                {{ $transaction->reference_number ?? 'N/A' }} <!-- Display Reference Number -->
+                            </td>
+                            <td>
                                 @if($transaction->file_path)
                                     <a href="{{ asset('storage/'.$transaction->file_path) }}" 
                                        class="btn btn-sm btn-outline-primary" 
@@ -276,6 +280,7 @@
                                     <span class="text-muted">N/A</span>
                                 @endif
                             </td>
+            
                         </tr>
                     @endforeach
                 </tbody>

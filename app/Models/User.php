@@ -24,6 +24,7 @@ class User extends Authenticatable
         'username',
         'password',
         'user_type',
+        'purok',
     ];
 
     public function familyMembers()
@@ -63,4 +64,5 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    
 }

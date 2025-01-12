@@ -66,8 +66,23 @@
                                 Request
                             </a>
                             <a class="nav-link" href="{{ route('transactions.history') }}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-history text-black"></i></div>
-                                History
+                                <div class="sb-nav-link-icon">
+                                    <i class="fas fa-history text-black"></i>
+                                    @php
+                                        $userId = Auth::id(); // Get the current user's ID
+                                        $unreadTransactionsCount = \App\Models\Transactions::where('user_id', $userId)
+                                            ->where('is_read', false)
+                                            ->whereIn('status', ['Not Ready', 'Processing', 'Ready for Pickup']) // Only count active transactions
+                                            ->count();
+                                    @endphp
+                                    @if($unreadTransactionsCount > 0)
+                                        <span class="badge bg-danger text-white rounded-circle position-absolute" 
+                                              style="top: 4px; right: 90px; font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+                                            {{ $unreadTransactionsCount }}
+                                        </span>
+                                    @endif
+                                </div>
+                                Transaction
                             </a>
 
                             <a class="nav-link" href="{{ route('comments.comments') }}">
@@ -101,13 +116,36 @@
                             </div>
                 
                             <!-- Financial Management -->
-                            <a class="nav-link collapsed {{ Auth::user()->user_type == 'treasurer' || Auth::user()->user_type == 'captain' ? '' : 'disabled' }}" href="#" 
-                               data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages"
-                               {{ Auth::user()->user_type != 'treasurer' && Auth::user()->user_type != 'captain' ? 'aria-disabled=true' : '' }}>
-                                <div class="sb-nav-link-icon"><i class="fas fa-donate text-black"></i></div>
-                                Financial Management
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down text-black"></i></div>
+                            <a class="nav-link collapsed {{ Auth::user()->user_type == 'treasurer' || Auth::user()->user_type == 'captain' ? '' : 'disabled' }}" 
+                                href="#" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapsePages" 
+                                aria-expanded="false" 
+                                aria-controls="collapsePages"
+                                {{ Auth::user()->user_type != 'treasurer' && Auth::user()->user_type != 'captain' ? 'aria-disabled=true' : '' }}>
+                                
+                                <div class="sb-nav-link-icon position-relative">
+                                    <i class="fas fa-donate text-black"></i>
+                                    @php
+                                        $allTransactionsCount = \App\Models\Transactions::whereIn('status', ['Not Ready', 'Processing', 'Ready for Pickup'])
+                                            ->where('deleted_by_user', false)
+                                            ->where('is_read', false)
+                                            ->count();
+                                    @endphp
+                                    @if($allTransactionsCount > 0)
+                                        <span class="badge bg-danger rounded-pill position-absolute" 
+                                              style="top: -20px; right: -150px; font-size: 0.65rem; min-width: 1rem;">
+                                            {{ $allTransactionsCount }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="ml-2">Financial Management</span>
+                                <div class="sb-sidenav-collapse-arrow">
+                                    <i class="fas fa-angle-down text-black"></i>
+                                </div>
                             </a>
+                            
+                             
                             <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
                                     <a class="nav-link" href="{{ route('budget.budgetplan') }}">Budget Planning</a>

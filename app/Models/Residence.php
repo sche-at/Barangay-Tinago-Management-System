@@ -65,4 +65,5 @@ class Residence extends Model
         ->findOrFail($id);
     return response()->json($residence);
 }
+
 }
